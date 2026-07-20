@@ -15,7 +15,7 @@ const contact = import.meta.env.VITE_CONTACT_INFO
         <RouterLink to="/"><YMCALogo /></RouterLink>
         <RouterLink to="/">Події</RouterLink>
         <RouterLink to="/data">Мої дані</RouterLink>
-        <RouterLink to="/visits">Що я відвідав</RouterLink>
+        <RouterLink to="/visits">Відвідане</RouterLink>
       </nav>
     </div>
   </header>
