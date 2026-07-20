@@ -1,0 +1,6 @@
+.env
+_yo.db
+yo.db
+yo.db-wal
+yo.db-shm
+main

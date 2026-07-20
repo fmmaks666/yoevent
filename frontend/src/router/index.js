@@ -1,21 +1,59 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import EventsView from '../views/EventsView.vue'
+import DataView from '../views/DataView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView,
+      name: 'events',
+      component: EventsView,
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue'),
+      path: '/data',
+      name: 'data',
+      component: DataView,
+    },
+    {
+      path: '/visits',
+      name: 'visits',
+      component: () => import('../views/VisitsView.vue'),
+    },
+    {
+      path: '/admin/dashboard',
+      name: 'admin',
+      component: () => import('../views/AdminMainView.vue'),
+    },
+    {
+      path: '/admin/visitors',
+      name: 'visitors',
+      component: () => import('../views/AdminVisitorsView.vue'),
+    },
+    {
+      path: '/admin/event/:id',
+      name: 'event',
+      component: () => import('../views/AdminEventView.vue'),
+    },
+    {
+      path: '/admin/login',
+      name: 'login',
+      component: () => import('../views/AdminLoginView.vue'),
+    },
+    {
+      path: '/tools',
+      name: 'tools',
+      component: () => import('../views/ToolsView.vue'),
+    },
+    {
+      path: '/qr/:id',
+      name: 'qr',
+      component: () => import('../views/QrView.vue'),
+    },
+    {
+      path: '/v/:id',
+      name: 'visit',
+      component: () => import('../views/VisitView.vue'),
     },
   ],
 })

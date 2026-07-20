@@ -1,23 +1,36 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { VueQueryDevtools } from '@tanstack/vue-query-devtools'
+import DataView from './views/DataView.vue'
+import YMCALogo from './components/YMCALogo.vue'
+
+const author = import.meta.env.VITE_AUTHOR
+const contact = import.meta.env.VITE_CONTACT_INFO
 </script>
 
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
     <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
       <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+        <RouterLink to="/"><YMCALogo /></RouterLink>
+        <RouterLink to="/">Події</RouterLink>
+        <RouterLink to="/data">Мої дані</RouterLink>
+        <RouterLink to="/visits">Що я відвідав</RouterLink>
       </nav>
     </div>
   </header>
 
   <RouterView />
+  <footer>
+    <RouterLink to="/admin/dashboard"><u>Для адміністраторів</u></RouterLink>
+    <br />
+    YMCA Нижнє Селище-Хуст. Сайт розробляє {{ author }}. Проблеми, Ідеї, Побажання: {{ contact }} у
+    Telegram
+    <!-- ·
+    <RouterLink to="/tools">Для організаторів</RouterLink> -->
+  </footer>
+
+  <VueQueryDevtools />
 </template>
 
 <style scoped>
@@ -26,16 +39,11 @@ header {
   max-height: 100vh;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
 nav {
   width: 100%;
-  font-size: 12px;
   text-align: center;
-  margin-top: 2rem;
+  margin: 0 4px;
+  margin-top: 32px;
 }
 
 nav a.router-link-exact-active {
@@ -56,30 +64,55 @@ nav a:first-of-type {
   border: 0;
 }
 
+nav {
+  font-size: 1.1rem;
+  display: flex;
+  flex-direction: row;
+  text-align: center;
+
+  align-items: center;
+  justify-content: center;
+  padding: 0 0;
+}
+
+footer a {
+  color: black;
+}
+
+footer {
+  border-radius: 1rem 1rem 0 0;
+  margin: 0;
+  margin-top: 1.5rem;
+  background-color: lightgray;
+  color: black;
+  padding: 1rem;
+  text-align: center;
+  text-justify: center;
+}
+
 @media (min-width: 1024px) {
-  header {
+  /* header {
     display: flex;
     place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+    flex-direction: row;
+  } */
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
+  /* header .wrapper {
+    width: 100%;
+    direction: row;
     display: flex;
-    place-items: flex-start;
+    align-items: center;
     flex-wrap: wrap;
-  }
+  } */
 
   nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
     margin-top: 1rem;
+    padding: 1rem 0;
+    font-size: 1.3rem;
+  }
+
+  footer {
+    border-radius: 1rem;
   }
 }
 </style>
