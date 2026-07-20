@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 
 	//"gorm.io/gorm/logger"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
 	"github.com/fmmaks666/yoevent-backend/internal/api"
@@ -28,12 +29,16 @@ func main() {
 	}
 	adminPass := os.Getenv("ADMIN_PASSWORD")
 	frontendUrl := os.Getenv("FRONTEND_URL")
+	ginMode := os.Getenv("GIN_MODE")
+	if ginMode == "release" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	models.Setup(db)
 
 	// ctx := context.Background()
 	// TODO: Make a config?
 	r := api.Setup(db, adminPass, frontendUrl)
-	fmt.Println("Listening on :8080")
+	fmt.Println("Listening...")
 	r.Run()
 }
