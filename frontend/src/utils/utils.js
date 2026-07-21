@@ -9,7 +9,9 @@ function formatDate(eventData) {
     return fmt.format(new Date(eventData.date))
   } else {
     const time = new Date(eventData.time)
-    const hour = time.getHours()
+    // THE WERID ASS TRICKS TO GET THIS BS WORKING
+    // TODO: KILL MYSELF OR MAKE THIS IN ANY GOOD WAY RESILIENT
+    const hour = time.getHours() + 3
     const min = time.getMinutes()
 
     // Dude, this tongue is not ye olde C, why we do require these breaks? To break our faces
