@@ -127,9 +127,10 @@ func (h *Handler) createVisit(ctx *gin.Context) {
 
 	// One day timeout
 	// What the fuck
-	loc := utils.Timezone()
 
-	timeout := time.Date(2000, time.January, 2, 0, 0, 0, 0, loc).Sub(time.Date(2000, time.January, 1, 0, 0, 0, 0, loc))
+	loc := time.UTC
+
+	timeout := time.Date(1970, time.January, 2, 0, 0, 0, 0, loc).Sub(time.Date(1970, time.January, 1, 0, 0, 0, 0, loc))
 	if event.IsOnetime && event.Date.Compare(time.Now()) == 1 || event.IsCancelled {
 		h.sendError(ctx, 400, "The event didn't yet happen or is cancelled")
 		return
@@ -143,7 +144,7 @@ func (h *Handler) createVisit(ctx *gin.Context) {
 	if event.IsOnetime {
 		date = *event.Date
 	} else {
-		now := time.Now()
+		now := time.Now().UTC()
 		date = utils.ClosestDate(now.Weekday(), now, *event.Weekday, *event.Time)
 	}
 	var v models.Visitor

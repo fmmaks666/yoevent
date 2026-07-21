@@ -59,7 +59,7 @@ func TimeToSeconds(t time.Time) int {
 }
 
 func ClosestDate(w time.Weekday, t time.Time, targetW time.Weekday, targetT time.Time) time.Time {
-	now := time.Now().In(Timezone())
+	now := time.Now().UTC()
 	days := time.Duration((now.Weekday()-targetW+6)%7) + 1
 	timeNow := TimeToSeconds(now)
 	targetTime := TimeToSeconds(targetT)
@@ -70,7 +70,7 @@ func ClosestDate(w time.Weekday, t time.Time, targetW time.Weekday, targetT time
 	prevDate := time.Date(
 		date.Year(), date.Month(), date.Day(),
 		targetT.Hour(), targetT.Minute(), targetT.Second(), targetT.Nanosecond(),
-		targetT.Location(),
+		time.UTC,
 	)
 	return prevDate
 }

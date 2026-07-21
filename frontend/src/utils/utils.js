@@ -4,6 +4,11 @@ function formatDate(eventData) {
     timeStyle: 'short',
     timeZone: 'Europe/Kyiv',
   })
+  const fmtTime = new Intl.DateTimeFormat('uk-UA', {
+    timeStyle: 'short',
+    timeZone: 'Europe/Kyiv',
+  })
+
   if (eventData === undefined) return '...'
   if (eventData.is_onetime) {
     return fmt.format(new Date(eventData.date))
@@ -11,8 +16,8 @@ function formatDate(eventData) {
     const time = new Date(eventData.time)
     // THE WERID ASS TRICKS TO GET THIS BS WORKING
     // TODO: KILL MYSELF OR MAKE THIS IN ANY GOOD WAY RESILIENT
-    const hour = time.getHours() + 3
-    const min = time.getMinutes()
+    const hour = time.getUTCHours()
+    const min = time.getUTCMinutes()
 
     // Dude, this tongue is not ye olde C, why we do require these breaks? To break our faces
 
@@ -44,7 +49,7 @@ function formatDate(eventData) {
         break
     }
 
-    return `${weekday} о ${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`
+    return `${weekday} о ${fmtTime.format(time)}`
   }
 }
 
@@ -59,6 +64,7 @@ function formatVisitDate(visit) {
   return fmt.format(damn)
 }
 
+// irrelevant
 // TO THE PERSON READING THIS
 // I LOVE YOU BECAUSE I HATE THIS
 // THE BACKEND, MY DEAR BACKEND SENDS THE OFFSET
@@ -68,18 +74,26 @@ function formatVisitDate(visit) {
 // LOOK THIS WORKS ON MY PC WHERE I HAVE CLANNAD INSTALLED
 // IT MAKES THE DATE CORRECT. THOUGH I WONDER WHAT WILL HAPPEN WHEN I DEPLOY TO MY SERVER IN
 // GERMANY, WHICH DOESN'T HAVE CLANNAD INSTALLED
+// I WILL JUST STORE IT ALL IN UTC, MY BROTHER
 function formatBirthdate(date) {
   const fmt = new Intl.DateTimeFormat('uk-UA', {
-    timeZone: 'Europe/Kyiv',
+    timeZone: 'UTC',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   })
-  console.log(date)
-  console.log(new Date(date).toLocaleString())
   const fuck = new Date(date)
-  fuck.setHours(fuck.getHours() + 3)
+  fuck.setHours(fuck.getHours())
   return fmt.format(fuck)
 }
 
-export { formatDate, formatVisitDate, formatBirthdate }
+function normalizeBirthdate(dateStr) {
+  // date YYYY-mm-dd
+  const [year, month, day] = dateStr.split('-').map(Number)
+  // UTC Date
+  const date = new Date(Date.UTC(year, month - 1, day))
+
+  return date.toISOString()
+}
+
+export { formatDate, formatVisitDate, formatBirthdate, normalizeBirthdate }

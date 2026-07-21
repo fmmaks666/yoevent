@@ -73,28 +73,29 @@ function isVisited(e) {
   if (e.is_onetime) {
     return e.last_visit === e.date
   }
-
+  // This looks horrific, doesn't it?
   let days = 0
   const now = new Date()
   // ADD 3 hours to make the same with our time TODO: Play with the locales
   //now.setHours(now.getHours() + 3)
-  const weekday = now.getDay()
-  const targetT = new Date(e.time)
+  const weekday = now.getUTCDay()
+
+  const [hour, min] = e.time.split('T')[1].split(':').map(Number)
   const targetW = e.weekday
-  const timeNow = now.getHours() * 60 * 60 + now.getMinutes() * 60
-  const timeTarget = targetT.getHours() * 60 * 60 + targetT.getMinutes() * 60
-  days = ((weekday - targetW + 6) % 7) + 1
+  const timeNow = now.getUTCHours() * 60 * 60 + now.getUTCMinutes() * 60
+  const timeTarget = hour * 60 * 60 + min * 60
+  days = (weekday - targetW + 7) % 7
   //return date.toString()
-  if (weekday === targetW && timeNow >= timeTarget) {
-    days = 0
+  if (days === 0 && timeNow < timeTarget) {
+    days = 7
   }
   const date = new Date()
-  date.setDate(now.getDate() - days)
-  date.setHours(targetT.getHours() + 3, targetT.getMinutes(), 0, 0) // THIS BS's in +00:00
+  date.setUTCDate(now.getDate() - days)
+  date.setUTCHours(hour, min, 0, 0)
 
   // MY SECOND GREATEST SIN
 
-  return e.last_visit == date.toISOString().slice(0, 19) + '+03:00'
+  return new Date(e.last_visit).toISOString() == date.toISOString()
 }
 </script>
 

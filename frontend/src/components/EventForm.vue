@@ -56,7 +56,6 @@ async function onSubmit() {
   emit('submit', normalizeData(data.value))
   // Make a request to fucking get the hash
   try {
-    //console.log(normalizeData(data.value))
   } catch (e) {
     console.error(e)
   }
@@ -71,7 +70,7 @@ function formatData(data) {
   const date = new Date(data.time)
   const hour = date.getHours()
   const min = date.getMinutes()
-  const time = `${hour}:${min}`
+  const time = `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`
   const formatted = { ...data }
   formatted.time = time
   return formatted
@@ -79,17 +78,22 @@ function formatData(data) {
 
 function normalizeData(data) {
   if (data.is_onetime) {
+    const [dateSeg, timeSeg] = data.date.split('T')
+    const [year, month, day] = dateSeg.split('-').map(Number)
+    const [hour, min] = timeSeg.split(':').map(Number)
+
+    const date = new Date(year, month - 1, day, hour, min)
     const normalized = { ...data }
     normalized.time = null
-    normalized.date = normalized.date + ':00Z'
+    normalized.date = date.toISOString()
     return normalized
   }
   const [hour, min] = data.time.split(':')
   // WHAT A HACKY WAY OF EXISTING, Neh?
-  const time = `2026-06-06T${hour}:${min}:00+03:00`
+  const time = new Date(1970, 0, 1, hour, min) // TODO: Switch to just HH:mm which might be tough in the future?
   const normalized = { ...data }
   normalized.date = null
-  normalized.time = time
+  normalized.time = time.toISOString()
   return normalized
 }
 </script>

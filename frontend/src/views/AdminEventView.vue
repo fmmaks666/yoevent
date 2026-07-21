@@ -23,7 +23,7 @@ const client = useQueryClient()
 
 const isEditing = ref(false)
 const date = new Date()
-const selectedDate = ref({ year: date.getFullYear(), month: date.getMonth() })
+const selectedDate = ref({ year: date.getFullYear(), month: date.getMonth() + 1 })
 
 const {
   mutateAsync,
