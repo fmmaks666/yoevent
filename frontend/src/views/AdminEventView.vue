@@ -154,7 +154,7 @@ async function onSubmitted(data) {
     </template>
     <button class="returnBtn" @click="router.back()">Повернутись</button>
     -->
-    <template v-if="!eventData.is_onetime">
+    <template v-if="eventData && !eventData.is_onetime">
       <h3>Оберіть проміжок часу</h3>
       <DateChooser class="chooser" v-model="selectedDate" />
     </template>

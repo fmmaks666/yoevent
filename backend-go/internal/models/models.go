@@ -53,7 +53,7 @@ type Visitor struct {
 	FirstName       string    `gorm:"not null"`
 	LastName        string    `gorm:"not null"`
 	Patronymic      string    `gorm:"not null"`
-	Age             int       `gorm:"not null"`
+	Birthdate       time.Time `gorm:"not null"`
 	Sex             utils.Sex `gorm:"type:tinyint;default:0;not null"`
 	PhoneNumber     string    `gorm:"not null"`
 	IsLocal         bool      `gorm:"not null"`
@@ -70,7 +70,7 @@ func (v *Visitor) ToDTO() VisitorDTO {
 			FirstName:       v.FirstName,
 			LastName:        v.LastName,
 			Patronymic:      v.Patronymic,
-			Age:             v.Age,
+			Birthdate:       v.Birthdate,
 			Sex:             v.Sex,
 			PhoneNumber:     v.PhoneNumber,
 			IsLocal:         &v.IsLocal,
@@ -80,14 +80,14 @@ func (v *Visitor) ToDTO() VisitorDTO {
 	}
 }
 
-func (v *Visitor) GetFirstName() string   { return v.FirstName }
-func (v *Visitor) GetLastName() string    { return v.LastName }
-func (v *Visitor) GetPatronymic() string  { return v.Patronymic }
-func (v *Visitor) GetAge() int            { return v.Age }
-func (v *Visitor) GetSex() utils.Sex      { return v.Sex }
-func (v *Visitor) GetPhoneNumber() string { return v.PhoneNumber }
-func (v *Visitor) GetIsLocal() bool       { return v.IsLocal }
-func (v *Visitor) GetIsDisabled() bool    { return v.IsDisabled }
+func (v *Visitor) GetFirstName() string    { return v.FirstName }
+func (v *Visitor) GetLastName() string     { return v.LastName }
+func (v *Visitor) GetPatronymic() string   { return v.Patronymic }
+func (v *Visitor) GetBirthdate() time.Time { return v.Birthdate }
+func (v *Visitor) GetSex() utils.Sex       { return v.Sex }
+func (v *Visitor) GetPhoneNumber() string  { return v.PhoneNumber }
+func (v *Visitor) GetIsLocal() bool        { return v.IsLocal }
+func (v *Visitor) GetIsDisabled() bool     { return v.IsDisabled }
 
 type Visit struct {
 	gorm.Model
@@ -108,8 +108,26 @@ func (vi *Visit) ToDTO() VisitDTO {
 	}
 }
 
+type VisitWithAge struct {
+	Visit
+	Age int
+}
+
+func createVisitsView(db *gorm.DB) {
+	// LOVE Hardcoding table names lol
+	db.Exec(`CREATE VIEW IF NOT EXISTS visits_with_age AS
+		SELECT vi.*, 
+		(
+			(strftime('%Y', vi.visit_date) - strftime('%Y', v.birthdate)) -
+			(strftime('%m-%d', vi.visit_date) < strftime('%m-%d', v.birthdate))
+		) as age
+		FROM visits vi
+		LEFT JOIN visitors v ON v.id = vi.visitor_id`)
+}
+
 func Setup(db *gorm.DB) {
 	db.AutoMigrate(&Event{})
 	db.AutoMigrate(&Visitor{})
 	db.AutoMigrate(&Visit{})
+	createVisitsView(db)
 }

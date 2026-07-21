@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { formatBirthdate } from '../utils/utils.js'
 defineProps({
   data: {
     type: Object,
@@ -16,7 +17,7 @@ defineEmits(['edit'])
     <p>
       <span class="focus">{{ data.last_name }} {{ data.first_name }} {{ data.patronymic }}</span>
       <br />
-      Вік: <span class="focus">{{ data.age }}</span> <br />
+      Дата народження: <span class="focus">{{ formatBirthdate(data.birthdate) }}</span> <br />
       Номер телефону: <span class="focus">{{ data.phone_number }}</span> <br />
       Стать: <span class="focus">{{ data.sex == 1 ? 'Чоловіча' : 'Жіноча' }}</span> <br />
       Соціальний статус:

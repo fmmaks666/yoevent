@@ -33,12 +33,13 @@ func main() {
 	if ginMode == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
+	salt := os.Getenv("SALT")
 
 	models.Setup(db)
 
 	// ctx := context.Background()
 	// TODO: Make a config?
-	r := api.Setup(db, adminPass, frontendUrl)
+	r := api.Setup(db, adminPass, frontendUrl, salt)
 	fmt.Println("Listening...")
 	r.Run()
 }

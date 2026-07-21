@@ -35,7 +35,7 @@ type VisitorEssentialDTO struct {
 	FirstName       string    `json:"first_name" binding:"required" form:"first_name"`
 	LastName        string    `json:"last_name" binding:"required" form:"last_name"`
 	Patronymic      string    `json:"patronymic" binding:"required" form:"patronymic"`
-	Age             int       `json:"age" binding:"required" form:"age"`
+	Birthdate       time.Time `json:"birthdate" binding:"required" form:"birthdate"`
 	Sex             utils.Sex `json:"sex" binding:"required" form:"sex"`
 	PhoneNumber     string    `json:"phone_number" binding:"required" form:"phone_number"`
 	IsLocal         *bool     `json:"is_local" binding:"required" form:"is_local"`
@@ -46,7 +46,7 @@ type VisitorEssentialDTO struct {
 func (v *VisitorEssentialDTO) GetFirstName() string     { return v.FirstName }
 func (v *VisitorEssentialDTO) GetLastName() string      { return v.LastName }
 func (v *VisitorEssentialDTO) GetPatronymic() string    { return v.Patronymic }
-func (v *VisitorEssentialDTO) GetAge() int              { return v.Age }
+func (v *VisitorEssentialDTO) GetBirthdate() time.Time  { return v.Birthdate }
 func (v *VisitorEssentialDTO) GetSex() utils.Sex        { return v.Sex }
 func (v *VisitorEssentialDTO) GetPhoneNumber() string   { return v.PhoneNumber }
 func (v *VisitorEssentialDTO) GetIsLocal() bool         { return *v.IsLocal }

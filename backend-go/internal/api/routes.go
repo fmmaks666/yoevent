@@ -18,7 +18,8 @@ import (
 )
 
 type Handler struct {
-	db *gorm.DB
+	db   *gorm.DB
+	salt string
 }
 
 func (h *Handler) sendError(ctx *gin.Context, code int, err string) {
@@ -194,14 +195,14 @@ func (h *Handler) createVisitor(ctx *gin.Context) {
 	}
 
 	dto := req.VisitorEssentialDTO
-	hash := utils.HashVisitor(&dto)
+	hash := utils.HashVisitor(&dto, h.salt)
 
 	err := gorm.G[models.Visitor](h.db).Create(ctx, &models.Visitor{
 		Hash:            hash,
 		FirstName:       dto.FirstName,
 		LastName:        dto.LastName,
 		Patronymic:      dto.Patronymic,
-		Age:             dto.Age,
+		Birthdate:       dto.Birthdate,
 		Sex:             dto.Sex,
 		PhoneNumber:     dto.PhoneNumber,
 		IsLocal:         *dto.IsLocal,
@@ -231,13 +232,13 @@ func (h *Handler) updateVisitor(ctx *gin.Context) {
 
 	var err error
 
-	newHash := utils.HashVisitor(&req.VisitorDTO)
+	newHash := utils.HashVisitor(&req.VisitorDTO, h.salt)
 	_, err = gorm.G[models.Visitor](h.db).Where("hash = ?", req.Hash).Updates(ctx, models.Visitor{
 		Hash:            newHash,
 		FirstName:       req.FirstName,
 		LastName:        req.LastName,
 		Patronymic:      req.Patronymic,
-		Age:             req.Age,
+		Birthdate:       req.Birthdate,
 		Sex:             req.Sex,
 		PhoneNumber:     req.PhoneNumber,
 		IsLocal:         *req.IsLocal,
@@ -361,7 +362,7 @@ func (h *Handler) getVisits(ctx *gin.Context) {
 			privacy = "Так"
 		}
 		// TODO: If an event is !onetime, check for visits for each possible date
-		writer.Write([]string{v.LastName, v.FirstName, v.Patronymic, v.PhoneNumber, strconv.Itoa(v.Age), sex, disability, status, privacy, vi.VisitDate.String()})
+		writer.Write([]string{v.LastName, v.FirstName, v.Patronymic, v.PhoneNumber, v.Birthdate.String(), sex, disability, status, privacy, vi.VisitDate.String()})
 	}
 
 	writer.Flush()
@@ -386,7 +387,7 @@ func (h *Handler) getStats(ctx *gin.Context) {
 	id := event.ID
 	stats := models.GetEventStatsResponse{}
 
-	base := gorm.G[models.Visit](h.db).Distinct("visitor_id").Where("event_id = ?", id).Joins(clause.LeftJoin.Association("Visitor"), nil)
+	base := gorm.G[models.Visit](h.db).Table("visits_with_age").Distinct("visitor_id").Where("event_id = ?", id).Joins(clause.LeftJoin.Association("Visitor"), nil)
 	if !*req.All {
 		base = base.Where("strftime('%m', visit_date) = ? AND strftime('%Y', visit_date) = ?", fmt.Sprintf("%02d", req.Month), strconv.Itoa(req.Year))
 	}
@@ -395,6 +396,8 @@ func (h *Handler) getStats(ctx *gin.Context) {
 
 	// SAVE ME GOD FROM THESE ERRORS
 	// THIS IS THE FUCKING BIGESST NIGHTMARE I WROTE IN MY DICK SHORT LIFE
+	// Calculate age:
+	// (VisitDate.YEAR - BirthDate.YEAR) - (VisitDate.Month.Day - BirthDay.Month.Day)
 	stats.Men, err = male.Count(ctx, "visitor_id")
 	stats.Women, err = female.Count(ctx, "visitor_id")
 	stats.MenBelowThirty, err = male.Where("age < ?", 30).Count(ctx, "visitor_id")
@@ -564,51 +567,8 @@ func (h *Handler) updateEvent(ctx *gin.Context) {
 	ctx.JSON(200, event.ToDTO())
 }
 
-// NO LONGER NEEDED
-// For the SHAYTAN's sake what the FUCK is this?
-func (h *Handler) FindOrCreateVisitor(ctx *gin.Context, dto models.VisitorEssentialDTO) (models.Visitor, error) {
-	var v models.Visitor
-	var err error
-	hash := utils.HashVisitor(&dto)
-	// BIG TRANSACTION
-	err = h.db.Transaction(func(tx *gorm.DB) error {
-		v, err = gorm.G[models.Visitor](tx).Where("hash = ?", hash).First(ctx)
-		if err != nil {
-			if !errors.Is(err, gorm.ErrRecordNotFound) {
-				return err
-			}
-
-			err = gorm.G[models.Visitor](h.db).Create(ctx, &models.Visitor{
-				Hash:        hash,
-				FirstName:   dto.FirstName,
-				LastName:    dto.LastName,
-				Patronymic:  dto.Patronymic,
-				Age:         dto.Age,
-				Sex:         dto.Sex,
-				PhoneNumber: dto.PhoneNumber,
-				IsLocal:     *dto.IsLocal,
-				IsDisabled:  *dto.IsDisabled,
-			})
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-	// END OF BIG TRANSACTION
-	if err != nil {
-		return v, err
-	}
-	v, err = gorm.G[models.Visitor](h.db).Where("hash = ?", hash).First(ctx)
-	if err != nil {
-		return v, err
-	}
-
-	return v, nil
-}
-
-func Setup(db *gorm.DB, adminPass, frontendUrl string) *gin.Engine {
-	handler := Handler{db}
+func Setup(db *gorm.DB, adminPass, frontendUrl, salt string) *gin.Engine {
+	handler := Handler{db, salt}
 
 	router := gin.Default()
 	conf := cors.Config{

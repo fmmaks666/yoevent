@@ -32,7 +32,7 @@ const data = ref({
   patronymic: '',
   phone_number: '',
   sex: 1,
-  age: undefined,
+  birthdate: undefined,
   is_local: true,
   is_disabled: false,
   agreed_to_privacy: false,
@@ -43,6 +43,7 @@ const isCancelable = ref(false)
 if (oldData && Object.keys(oldData).length > 0) {
   isCancelable.value = true
   data.value = oldData
+  data.value.birthdate = oldData.birthdate.slice(0, 10)
 }
 
 async function onSubmit() {
@@ -74,8 +75,8 @@ async function onSubmit() {
     <input type="text" v-model.trim="data.first_name" placeholder="Ім'я" />
     <input type="text" v-model.trim="data.patronymic" placeholder="По батькові" />
 
-    <label for="age">Вік</label>
-    <input type="number" v-model.number="data.age" min="0" placeholder="Вік" id="age" />
+    <label for="birthdate">Дата народження</label>
+    <input type="date" v-model="data.birthdate" id="birthdate" />
 
     <label for="phone-num">Номер телефону</label>
     <input type="tel" v-model.trim="data.phone_number" placeholder="0685551010" id="phone-num" />

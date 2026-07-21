@@ -23,7 +23,7 @@ type HashableVisitor interface {
 	GetFirstName() string
 	GetLastName() string
 	GetPatronymic() string
-	GetAge() int
+	GetBirthdate() time.Time
 	GetSex() Sex
 	GetPhoneNumber() string
 	GetIsLocal() bool
@@ -34,18 +34,18 @@ type HashableVisitor interface {
 
 // These two functions will be in my worst nightmares
 // TODO: Make an interface to FUCK these duplicates
-func HashVisitor(a HashableVisitor) string {
+func HashVisitor(a HashableVisitor, salt string) string {
 	b := strings.Builder{}
 	b.WriteString(a.GetFirstName())
 	b.WriteString(a.GetLastName())
 	b.WriteString(a.GetPatronymic())
-	b.WriteString(strconv.Itoa(a.GetAge()))
+	b.WriteString(a.GetBirthdate().String())
 	b.WriteString(string(a.GetPhoneNumber()))
 	b.WriteString(string(a.GetSex()))
 	b.WriteString(strconv.FormatBool(a.GetIsLocal()))
 	b.WriteString(strconv.FormatBool(a.GetIsDisabled()))
 	b.WriteString(strconv.FormatBool(a.GetAgreedToPrivacy()))
-	b.WriteString("This BOY SHOULD BE IN ENV NOT HERE, I MEAN NOT BOY BUT SALT")
+	b.WriteString(salt)
 
 	hash := sha1.Sum([]byte(b.String()))
 	return hex.EncodeToString(hash[:])

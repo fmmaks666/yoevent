@@ -55,4 +55,14 @@ function formatVisitDate(visit) {
   return fmt.format(new Date(visit.visit_date))
 }
 
-export { formatDate, formatVisitDate }
+function formatBirthdate(date) {
+  const fmt = new Intl.DateTimeFormat('uk-UA', {
+    timeZone: 'Europe/Kyiv',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+  return fmt.format(new Date(date))
+}
+
+export { formatDate, formatVisitDate, formatBirthdate }
