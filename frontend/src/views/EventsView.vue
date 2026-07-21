@@ -73,26 +73,11 @@ function isVisited(e) {
   if (e.is_onetime) {
     return e.last_visit === e.date
   }
-  /* A comment!
-  now := time.Now()
-	days := time.Duration((now.Weekday()-targetW+6)%7) + 1
-	timeNow := TimeToSeconds(now)
-	targetTime := TimeToSeconds(targetT)
-	if now.Weekday() == targetW && timeNow >= targetTime {
-		days = 0
-	}
-	date := now.Add(-days * 24 * time.Hour)
-	prevDate := time.Date(
-		date.Year(), date.Month(), date.Day(),
-		targetT.Hour(), targetT.Minute(), targetT.Second(), targetT.Nanosecond(),
-		targetT.Location(),
-	)
-	return prevDate
-  */
+
   let days = 0
   const now = new Date()
   // ADD 3 hours to make the same with our time TODO: Play with the locales
-  now.setHours(now.getHours() + 3)
+  //now.setHours(now.getHours() + 3)
   const weekday = now.getDay()
   const targetT = new Date(e.time)
   const targetW = e.weekday
@@ -105,9 +90,11 @@ function isVisited(e) {
   }
   const date = new Date()
   date.setDate(now.getDate() - days)
-  date.setHours(targetT.getHours(), targetT.getMinutes(), 0, 0)
+  date.setHours(targetT.getHours() + 3, targetT.getMinutes(), 0, 0) // THIS BS's in +00:00
 
-  return e.last_visit == date.toISOString().slice(0, 19) + 'Z'
+  // MY SECOND GREATEST SIN
+
+  return e.last_visit == date.toISOString().slice(0, 19) + '+03:00'
 }
 </script>
 

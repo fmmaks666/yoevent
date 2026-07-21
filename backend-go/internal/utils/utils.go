@@ -59,7 +59,7 @@ func TimeToSeconds(t time.Time) int {
 }
 
 func ClosestDate(w time.Weekday, t time.Time, targetW time.Weekday, targetT time.Time) time.Time {
-	now := time.Now()
+	now := time.Now().In(Timezone())
 	days := time.Duration((now.Weekday()-targetW+6)%7) + 1
 	timeNow := TimeToSeconds(now)
 	targetTime := TimeToSeconds(targetT)
@@ -77,4 +77,12 @@ func ClosestDate(w time.Weekday, t time.Time, targetW time.Weekday, targetT time
 
 func Slugify(s string) string {
 	return slug.Make(s)
+}
+
+func Timezone() *time.Location {
+	loc, err := time.LoadLocation("Europe/Kyiv")
+	if err != nil {
+		loc = time.Local
+	}
+	return loc
 }

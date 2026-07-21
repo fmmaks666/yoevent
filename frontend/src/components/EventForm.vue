@@ -85,7 +85,8 @@ function normalizeData(data) {
     return normalized
   }
   const [hour, min] = data.time.split(':')
-  const time = `2026-06-30T${hour}:${min}:00Z`
+  // WHAT A HACKY WAY OF EXISTING, Neh?
+  const time = `2026-06-06T${hour}:${min}:00+03:00`
   const normalized = { ...data }
   normalized.date = null
   normalized.time = time
