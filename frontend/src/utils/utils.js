@@ -54,9 +54,20 @@ function formatVisitDate(visit) {
     timeStyle: 'short',
     timeZone: 'Europe/Kyiv',
   })
-  return fmt.format(new Date(visit.visit_date))
+  const damn = new Date(visit.visit_date)
+  damn.setHours(damn.getHours() + 3)
+  return fmt.format(damn)
 }
 
+// TO THE PERSON READING THIS
+// I LOVE YOU BECAUSE I HATE THIS
+// THE BACKEND, MY DEAR BACKEND SENDS THE OFFSET
+// AND YET IT IGNORES IT COMPLETELY GOING FOR F'KING +00:00
+// WHY IS THAT IS NOT CLEAR TO ME BUT I WANT TO KILL EVERYTHING OR RATHER GO CRY PLAYING CLANNAD
+// DON'T YOU THINK IT'S FUNNY HOW A JAPANESE BISHOUJO GAME CAN MAKE A UKRAINIAN GUY CRY?
+// LOOK THIS WORKS ON MY PC WHERE I HAVE CLANNAD INSTALLED
+// IT MAKES THE DATE CORRECT. THOUGH I WONDER WHAT WILL HAPPEN WHEN I DEPLOY TO MY SERVER IN
+// GERMANY, WHICH DOESN'T HAVE CLANNAD INSTALLED
 function formatBirthdate(date) {
   const fmt = new Intl.DateTimeFormat('uk-UA', {
     timeZone: 'Europe/Kyiv',
@@ -64,7 +75,11 @@ function formatBirthdate(date) {
     month: 'long',
     year: 'numeric',
   })
-  return fmt.format(new Date(date))
+  console.log(date)
+  console.log(new Date(date).toLocaleString())
+  const fuck = new Date(date)
+  fuck.setHours(fuck.getHours() + 3)
+  return fmt.format(fuck)
 }
 
 export { formatDate, formatVisitDate, formatBirthdate }

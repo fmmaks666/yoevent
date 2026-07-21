@@ -25,7 +25,7 @@ async function postVisit(event_id, visitor) {
 async function postVisitor(data) {
   const req = data
   req.sex = Number(req.sex)
-  req.birthdate = `${req.birthdate} 00:00:00+03:00`
+  req.birthdate = `${req.birthdate}T00:00:00+03:00`
   const json = JSON.stringify(req)
   return fetch(`${API}/visitor`, {
     method: 'POST',
@@ -39,7 +39,7 @@ async function postVisitor(data) {
 async function updateVisitor(data) {
   const req = data
   req.sex = Number(req.sex)
-  req.birthdate = `${req.birthdate} 00:00:00+03:00`
+  req.birthdate = `${req.birthdate}T00:00:00+03:00`
   const json = JSON.stringify(req)
   return fetch(`${API}/visitor`, {
     method: 'PUT',
