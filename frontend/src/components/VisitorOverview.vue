@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { formatDate } from '../utils/utils.js'
+import { formatDate, formatBirthdate } from '../utils/utils.js'
 import Card from './Card.vue'
 
 defineProps({
@@ -19,7 +19,7 @@ const showMore = ref(false)
       <span class="focus">{{ data.last_name }} {{ data.first_name }} {{ data.patronymic }} </span>
     </p>
     <p v-if="showMore">
-      Вік: <span class="focus">{{ data.age }}</span> <br />
+      Вік: <span class="focus">{{ formatBirthdate(data.birthdate) }}</span> <br />
       Номер телефону: <span class="focus">{{ data.phone_number }}</span> <br />
       Стать: <span class="focus">{{ data.sex == 1 ? 'Чоловіча' : 'Жіноча' }}</span> <br />
       Соціальний статус:
