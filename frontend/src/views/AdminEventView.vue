@@ -145,7 +145,11 @@ async function onSubmitted(data) {
         @submit="onSubmitted"
         @cancel="isEditing = false"
       />
+      <!-- TODO: This dickhead has a problem of throwing up when it's an invalid date, handle it
+        somehow, brother -->
       <EventOverview v-else :data="eventData" @edit="isEditing = !isEditing" />
+      <ErrorBox v-if="isErrorUpdate && isEditing" :message="errorUpdate?.message" />
+      <Spinner v-else-if="isPendingUpdate" />
     </template>
     <!-- <Error v-else-if="isError || (data && data.error)" :message="error || data.error" />
     <template v-else>

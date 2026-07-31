@@ -64,6 +64,8 @@ async function onSubmit() {
 function formatData(data) {
   if (data.is_onetime) {
     const formatted = { ...data }
+    const date = new Date(data.date)
+    // TODO: Fix time: it's in UTC
     formatted.date = formatted.date.slice(0, 16)
     return formatted
   }
