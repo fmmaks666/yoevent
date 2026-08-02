@@ -104,8 +104,8 @@ function normalizeData(data) {
   <h1>{{ cancelable ? 'Редагувати' : 'Створити' }} подію</h1>
   <form @submit.prevent="onSubmit()">
     <label for="title">Інформація про події</label>
-    <input type="text" v-model.trim="data.title" placeholder="Назва події" id="title" />
-    <input type="text" v-model.trim="data.description" placeholder="Опис" />
+    <input type="text" v-model.trim="data.title" placeholder="Назва події" id="title" required />
+    <input type="text" v-model.trim="data.description" placeholder="Опис" required />
     <div class="group">
       <input type="checkbox" v-model="data.is_onetime" name="onetime" id="onetime" />
       <label for="onetime">Одноразова подія</label>
@@ -115,10 +115,10 @@ function normalizeData(data) {
       <label for="private">Схована подія</label>
     </div>
 
-    <input v-if="data.is_onetime" type="datetime-local" v-model.trim="data.date" />
+    <input v-if="data.is_onetime" type="datetime-local" v-model.trim="data.date" required />
     <template v-else>
-      <input type="time" v-model.trim="data.time" />
-      <select v-model="data.weekday">
+      <input type="time" v-model.trim="data.time" required />
+      <select v-model="data.weekday" required>
         <option :value="1">Понеділок</option>
         <option :value="2">Вівторок</option>
         <option :value="3">Середа</option>

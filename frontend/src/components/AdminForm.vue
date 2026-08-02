@@ -37,7 +37,7 @@ function onSubmit() {
   <h1>Увійдіть, щоб отримати доступ</h1>
   <form @submit.prevent="onSubmit()">
     <label for="password">Пароль адміністратора</label>
-    <input type="password" v-model="data.password" placeholder="Пароль" id="password" />
+    <input type="password" v-model="data.password" placeholder="Пароль" id="password" required />
 
     <input type="submit" value="Увійти" />
     <!-- <input type="submit" value="Нова людина" /> -->

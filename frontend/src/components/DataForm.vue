@@ -71,15 +71,21 @@ async function onSubmit() {
   <h1 v-else>Ваші дані</h1>
   <form @submit.prevent="onSubmit()">
     <label for="name">ПІБ</label>
-    <input type="text" v-model.trim="data.last_name" placeholder="Прізвище" id="name" />
-    <input type="text" v-model.trim="data.first_name" placeholder="Ім'я" />
-    <input type="text" v-model.trim="data.patronymic" placeholder="По батькові" />
+    <input type="text" v-model.trim="data.last_name" placeholder="Прізвище" id="name" required />
+    <input type="text" v-model.trim="data.first_name" placeholder="Ім'я" required />
+    <input type="text" v-model.trim="data.patronymic" placeholder="По батькові" required />
 
     <label for="birthdate">Дата народження</label>
-    <input type="date" v-model="data.birthdate" id="birthdate" />
+    <input type="date" v-model="data.birthdate" id="birthdate" required />
 
     <label for="phone-num">Номер телефону</label>
-    <input type="tel" v-model.trim="data.phone_number" placeholder="0685551010" id="phone-num" />
+    <input
+      type="tel"
+      v-model.trim="data.phone_number"
+      placeholder="0685551010"
+      id="phone-num"
+      required
+    />
 
     <div class="group">
       <div class="group">
@@ -93,15 +99,25 @@ async function onSubmit() {
     </div>
 
     <div class="group">
-      <input type="checkbox" v-model="data.is_local" name="local" id="local" />
+      <input type="checkbox" v-model="data.is_local" name="local" id="local"/>
       <label for="local">Місцевий мешканець (Інакше ВПО)</label>
     </div>
     <div class="group">
-      <input type="checkbox" v-model="data.is_disabled" name="disability" id="disability" />
+      <input
+        type="checkbox"
+        v-model="data.is_disabled"
+        name="disability"
+        id="disability"
+      />
       <label for="disability">Наявність інвалідності</label>
     </div>
     <div class="group">
-      <input type="checkbox" v-model="data.agreed_to_privacy" name="privacy" id="privacy" />
+      <input
+        type="checkbox"
+        v-model="data.agreed_to_privacy"
+        name="privacy"
+        id="privacy"
+      />
       <label for="privacy"
         >Надаю добровільну згоду на обробку моїх персональних даних, необхідних для участі в заході
         та звітності проєкту, а також на фото- та відеозйомку з подальшим використанням отриманих
