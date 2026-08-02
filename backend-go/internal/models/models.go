@@ -15,7 +15,7 @@ type Event struct {
 	Title             string        `gorm:"not null"`
 	Description       string        `gorm:"not null"`
 	Date              *time.Time    `gorm:"nullable"`
-	IsOnetime         bool          `gorm:"not null"`
+	IsOnetime         *bool         `gorm:"not null"`
 	Weekday           *time.Weekday `gorm:"nullable"`
 	Time              *time.Time    `gorm:"nullable"`
 	IsPrivate         *bool         `gorm:"not null"`
@@ -32,7 +32,7 @@ func (e *Event) ToDTO() EventDTO {
 			Title:             e.Title,
 			Description:       e.Description,
 			Date:              e.Date,
-			IsOnetime:         &e.IsOnetime,
+			IsOnetime:         e.IsOnetime,
 			Weekday:           e.Weekday,
 			Time:              e.Time,
 			IsPrivate:         e.IsPrivate,

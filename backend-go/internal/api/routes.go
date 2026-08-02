@@ -131,17 +131,17 @@ func (h *Handler) createVisit(ctx *gin.Context) {
 	loc := time.UTC
 
 	timeout := time.Date(1970, time.January, 2, 0, 0, 0, 0, loc).Sub(time.Date(1970, time.January, 1, 0, 0, 0, 0, loc))
-	if event.IsOnetime && event.Date.Compare(time.Now()) == 1 || event.IsCancelled {
+	if *event.IsOnetime && event.Date.Compare(time.Now()) == 1 || event.IsCancelled {
 		h.sendError(ctx, 400, "The event didn't yet happen or is cancelled")
 		return
-	} else if event.IsOnetime && time.Now().After(event.Date.Add(timeout)) {
+	} else if *event.IsOnetime && time.Now().After(event.Date.Add(timeout)) {
 		h.sendError(ctx, 400, "It's too late to add a visit")
 		return
 	}
 
 	// TODO: Holy fuck's sake optimize this
 	var date time.Time
-	if event.IsOnetime {
+	if *event.IsOnetime {
 		date = *event.Date
 	} else {
 		now := time.Now().UTC()
@@ -491,7 +491,7 @@ func (h *Handler) createEvent(ctx *gin.Context) {
 		Title:             req.Title,
 		Description:       req.Description,
 		Date:              date,
-		IsOnetime:         *req.IsOnetime,
+		IsOnetime:         req.IsOnetime,
 		Weekday:           weekday,
 		Time:              time,
 		IsPrivate:         req.IsPrivate,
@@ -549,7 +549,7 @@ func (h *Handler) updateEvent(ctx *gin.Context) {
 		Title:             req.Title,
 		Description:       req.Description,
 		Date:              date,
-		IsOnetime:         *req.IsOnetime,
+		IsOnetime:         req.IsOnetime,
 		Weekday:           weekday,
 		Time:              time,
 		IsPrivate:         req.IsPrivate,

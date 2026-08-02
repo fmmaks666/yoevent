@@ -92,6 +92,7 @@ function normalizeData(data) {
   }
   const [hour, min] = data.time.split(':')
   // WHAT A HACKY WAY OF EXISTING, Neh?
+  console.log(hour, min)
   const time = new Date(1970, 0, 1, hour, min) // TODO: Switch to just HH:mm which might be tough in the future?
   const normalized = { ...data }
   normalized.date = null
