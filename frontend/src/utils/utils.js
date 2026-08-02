@@ -85,7 +85,12 @@ function formatBirthdate(date) {
 }
 
 function formatTime(date) {
-  const fmt = new Intl.DateTimeFormat('uk-Ua')
+  const fmt = new Intl.DateTimeFormat('uk-UA', {
+    timeStyle: 'short',
+  })
+
+  const fuck = new Date(date)
+  return fmt.format(fuck)
 }
 
 function normalizeBirthdate(dateStr) {

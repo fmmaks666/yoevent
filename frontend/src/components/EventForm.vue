@@ -92,7 +92,8 @@ function normalizeData(data) {
   }
   const [hour, min] = data.time.split(':')
   // WHAT A HACKY WAY OF EXISTING, Neh?
-  console.log(hour, min)
+  // Well, it actually works as expected, here you get your local time and in the overview Kyiv
+  // time, though it is weird
   const time = new Date(1970, 0, 1, hour, min) // TODO: Switch to just HH:mm which might be tough in the future?
   const normalized = { ...data }
   normalized.date = null
