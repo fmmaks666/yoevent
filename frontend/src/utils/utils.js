@@ -77,8 +77,10 @@ function formatVisitDate(visit) {
 // I WILL JUST STORE IT ALL IN UTC, MY BROTHER
 function formatBirthdate(date) {
   const fmt = new Intl.DateTimeFormat('uk-UA', {
-    timeZone: 'Europe/Kyiv',
-    timeStyle: 'short',
+    timeZone: 'UTC',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
   })
   const fuck = new Date(date)
   return fmt.format(fuck)
