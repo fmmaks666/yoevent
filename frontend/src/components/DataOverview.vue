@@ -22,7 +22,8 @@ defineEmits(['edit'])
       Стать: <span class="focus">{{ data.sex == 1 ? 'Чоловіча' : 'Жіноча' }}</span> <br />
       Соціальний статус:
       <span class="focus">{{ data.is_local ? 'Місцевий мешканець' : 'ВПО' }}</span> <br />
-      <template v-if="data.residence !== '' && data.residence !== null"
+      <template
+        v-if="data.residence !== '' && data.residence !== null && data.residence !== undefined"
         >Місто проживання: <span class="focus">{{ data.residence }}</span> <br />
       </template>
 
