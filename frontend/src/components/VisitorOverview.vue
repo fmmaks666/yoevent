@@ -24,6 +24,9 @@ const showMore = ref(false)
       Стать: <span class="focus">{{ data.sex == 1 ? 'Чоловіча' : 'Жіноча' }}</span> <br />
       Соціальний статус:
       <span class="focus">{{ data.is_local ? 'Місцевий мешканець' : 'ВПО' }}</span> <br />
+      <template v-if="data.residence !== '' && data.residence !== null"
+        >Місто проживання: <span class="focus">{{ data.residence }}</span> <br />
+      </template>
       <span class="focus">{{ data.is_disabled ? 'Є інвалідність' : 'Немає інвалідностей' }}</span>
       <br />
       Згода на обробку особистих даних:

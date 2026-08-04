@@ -27,6 +27,7 @@ type HashableVisitor interface {
 	GetSex() Sex
 	GetPhoneNumber() string
 	GetIsLocal() bool
+	GetResidence() *string
 	GetIsDisabled() bool
 	GetAgreedToPrivacy() bool
 	// firstTimer bool
@@ -43,6 +44,11 @@ func HashVisitor(a HashableVisitor, salt string) string {
 	b.WriteString(string(a.GetPhoneNumber()))
 	b.WriteString(string(a.GetSex()))
 	b.WriteString(strconv.FormatBool(a.GetIsLocal()))
+	if a.GetResidence() != nil {
+		b.WriteString(*a.GetResidence())
+	} else {
+		b.WriteString("---unspecified---")
+	}
 	b.WriteString(strconv.FormatBool(a.GetIsDisabled()))
 	b.WriteString(strconv.FormatBool(a.GetAgreedToPrivacy()))
 	b.WriteString(salt)

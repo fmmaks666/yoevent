@@ -7,6 +7,7 @@ import { postVisitor, updateVisitor } from '../api/api.js'
 import ErrorBox from '../components/ErrorBox.vue'
 import Spinner from '../components/Spinner.vue'
 import DataOverview from '../components/DataOverview.vue'
+import { convertData } from '../utils/utils.js'
 
 const emit = defineEmits(['submit', 'cancel'])
 
@@ -25,6 +26,8 @@ const { mutateAsync, isPending, isError, error } = useMutation({
   },
 })
 
+// TODO: SEPARATION OF DAMN CONCERNS, I WILL NEED TO REUSE THIS
+
 const data = ref({
   visitor: '',
   first_name: '',
@@ -42,8 +45,8 @@ const oldData = getData()
 const isCancelable = ref(false)
 if (oldData && Object.keys(oldData).length > 0) {
   isCancelable.value = true
-  data.value = oldData
-  data.value.birthdate = oldData.birthdate.slice(0, 10)
+  data.value = convertData(oldData)
+  //data.value.birthdate = oldData.birthdate.slice(0, 10)
 }
 
 async function onSubmit() {
@@ -86,7 +89,13 @@ async function onSubmit() {
       id="phone-num"
       required
     />
-
+    <input
+      type="text"
+      v-model.trim="data.residence"
+      placeholder="Місто проживання"
+      id="residence"
+      required
+    />
     <div class="group">
       <div class="group">
         <input type="radio" v-model.number="data.sex" name="sex" id="female" :value="2" />
@@ -98,26 +107,21 @@ async function onSubmit() {
       </div>
     </div>
 
-    <div class="group">
+    <!-- <div class="group">
       <input type="checkbox" v-model="data.is_local" name="local" id="local"/>
       <label for="local">Місцевий мешканець (Інакше ВПО)</label>
-    </div>
+    </div> -->
     <div class="group">
-      <input
-        type="checkbox"
-        v-model="data.is_disabled"
-        name="disability"
-        id="disability"
-      />
+      <input type="checkbox" v-model="data.has_moved" name="local" id="moved" />
+      <label for="moved">ВПО</label>
+    </div>
+
+    <div class="group">
+      <input type="checkbox" v-model="data.is_disabled" name="disability" id="disability" />
       <label for="disability">Наявність інвалідності</label>
     </div>
     <div class="group">
-      <input
-        type="checkbox"
-        v-model="data.agreed_to_privacy"
-        name="privacy"
-        id="privacy"
-      />
+      <input type="checkbox" v-model="data.agreed_to_privacy" name="privacy" id="privacy" />
       <label for="privacy"
         >Надаю добровільну згоду на обробку моїх персональних даних, необхідних для участі в заході
         та звітності проєкту, а також на фото- та відеозйомку з подальшим використанням отриманих

@@ -57,6 +57,7 @@ type Visitor struct {
 	Sex             utils.Sex `gorm:"type:tinyint;default:0;not null"`
 	PhoneNumber     string    `gorm:"not null"`
 	IsLocal         bool      `gorm:"not null"`
+	Residence       *string   `gorm:"nullable"`
 	IsDisabled      bool      `gorm:"not null"`
 	AgreedToPrivacy bool      `gorm:"not null;default:false"`
 	Visits          []Visit   `gorm:"foreignKey:VisitorID;constraint:OnDelete:CASCADE,"` //`gorm:"foreignkey:VisitorID;references:ID"`
@@ -74,6 +75,7 @@ func (v *Visitor) ToDTO() VisitorDTO {
 			Sex:             v.Sex,
 			PhoneNumber:     v.PhoneNumber,
 			IsLocal:         &v.IsLocal,
+			Residence:       v.Residence,
 			IsDisabled:      &v.IsDisabled,
 			AgreedToPrivacy: &v.AgreedToPrivacy,
 		},
@@ -87,6 +89,7 @@ func (v *Visitor) GetBirthdate() time.Time { return v.Birthdate }
 func (v *Visitor) GetSex() utils.Sex       { return v.Sex }
 func (v *Visitor) GetPhoneNumber() string  { return v.PhoneNumber }
 func (v *Visitor) GetIsLocal() bool        { return v.IsLocal }
+func (v *Visitor) GetResidence() *string   { return v.Residence }
 func (v *Visitor) GetIsDisabled() bool     { return v.IsDisabled }
 
 type Visit struct {

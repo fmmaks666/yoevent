@@ -39,6 +39,7 @@ type VisitorEssentialDTO struct {
 	Sex             utils.Sex `json:"sex" binding:"required" form:"sex"`
 	PhoneNumber     string    `json:"phone_number" binding:"required" form:"phone_number"`
 	IsLocal         *bool     `json:"is_local" binding:"required" form:"is_local"`
+	Residence       *string   `json:"residence" form:"residence"`
 	IsDisabled      *bool     `json:"is_disabled" binding:"required" form:"is_disabled"`
 	AgreedToPrivacy *bool     `json:"agreed_to_privacy" binding:"required" form:"agreed_to_privacy"`
 }
@@ -50,6 +51,7 @@ func (v *VisitorEssentialDTO) GetBirthdate() time.Time  { return v.Birthdate }
 func (v *VisitorEssentialDTO) GetSex() utils.Sex        { return v.Sex }
 func (v *VisitorEssentialDTO) GetPhoneNumber() string   { return v.PhoneNumber }
 func (v *VisitorEssentialDTO) GetIsLocal() bool         { return *v.IsLocal }
+func (v *VisitorEssentialDTO) GetResidence() *string    { return v.Residence }
 func (v *VisitorEssentialDTO) GetIsDisabled() bool      { return *v.IsDisabled }
 func (v *VisitorEssentialDTO) GetAgreedToPrivacy() bool { return *v.AgreedToPrivacy }
 

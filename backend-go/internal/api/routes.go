@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/fmmaks666/yoevent-backend/internal/models"
@@ -209,6 +210,7 @@ func (h *Handler) createVisitor(ctx *gin.Context) {
 		Sex:             dto.Sex,
 		PhoneNumber:     dto.PhoneNumber,
 		IsLocal:         *dto.IsLocal,
+		Residence:       dto.Residence,
 		IsDisabled:      *dto.IsDisabled,
 		AgreedToPrivacy: *dto.AgreedToPrivacy,
 	})
@@ -245,6 +247,7 @@ func (h *Handler) updateVisitor(ctx *gin.Context) {
 		Sex:             req.Sex,
 		PhoneNumber:     req.PhoneNumber,
 		IsLocal:         *req.IsLocal,
+		Residence:       req.Residence,
 		IsDisabled:      *req.IsDisabled,
 		AgreedToPrivacy: *req.AgreedToPrivacy,
 	})
@@ -320,7 +323,7 @@ func (h *Handler) getVisits(ctx *gin.Context) {
 		return
 	}
 
-	var visits []models.Visit
+	var visits []models.VisitWithAge
 	var err error
 	// Order by EVENT.Date or by CreatedAt?
 	//visits, err = gorm.G[models.Visit](h.db).Order("created_at asc").Joins(clause.LeftJoin.Association("visitor_id"), func(db gorm.JoinBuilder, joinTable, curTable clause.Table) error {
@@ -328,7 +331,7 @@ func (h *Handler) getVisits(ctx *gin.Context) {
 	//		return nil
 	//}).Offset(offset).Limit(models.PerPage).Find(ctx)
 
-	base := gorm.G[models.Visit](h.db).Joins(clause.InnerJoin.Association("Event"), func(db gorm.JoinBuilder, joinTable, curTable clause.Table) error {
+	base := gorm.G[models.Visit](h.db).Table("visits_with_age").Joins(clause.InnerJoin.Association("Event"), func(db gorm.JoinBuilder, joinTable, curTable clause.Table) error {
 		db.Where("public_id = ?", req.EventID)
 		return nil
 	})
@@ -337,7 +340,7 @@ func (h *Handler) getVisits(ctx *gin.Context) {
 		base = base.Where("strftime('%m', visit_date) = ? AND strftime('%Y', visit_date) = ?", fmt.Sprintf("%02d", req.Month), strconv.Itoa(req.Year))
 	}
 
-	visits, err = base.Preload("Visitor", nil).Find(ctx)
+	err = base.Preload("Visitor", nil).Scan(ctx, &visits)
 
 	if err != nil {
 		h.sendError(ctx, 400, err.Error())
@@ -346,6 +349,15 @@ func (h *Handler) getVisits(ctx *gin.Context) {
 	buff := new(bytes.Buffer)
 
 	writer := csv.NewWriter(buff)
+	// NOTE: Remember to edit this, whilst I have this terrible architecture, icha icha shite
+
+	writer.Write([]string{
+		"Прізвище", "Ім'я", "По батькові",
+		"Номер телефону",
+		"Вік", "Стать", "Наявність інвалідності",
+		"Соц. статус", "Місто проживання",
+		"Згода на обр. даних", "Дата відвідування",
+	})
 	for _, vi := range visits {
 		v := vi.Visitor
 		sex := "Жінка"
@@ -360,12 +372,16 @@ func (h *Handler) getVisits(ctx *gin.Context) {
 		if !v.IsLocal {
 			status = "ВПО"
 		}
+		residence := "Не вказано"
+		if v.Residence != nil && strings.Trim(*v.Residence, " ") != "" {
+			residence = *v.Residence
+		}
 		privacy := "Ні"
 		if v.AgreedToPrivacy {
 			privacy = "Так"
 		}
 		// TODO: If an event is !onetime, check for visits for each possible date
-		writer.Write([]string{v.LastName, v.FirstName, v.Patronymic, v.PhoneNumber, v.Birthdate.String(), sex, disability, status, privacy, vi.VisitDate.String()})
+		writer.Write([]string{v.LastName, v.FirstName, v.Patronymic, v.PhoneNumber, strconv.Itoa(vi.Age), sex, disability, status, residence, privacy, vi.VisitDate.Format(time.RFC822)})
 	}
 
 	writer.Flush()

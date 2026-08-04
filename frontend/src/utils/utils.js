@@ -104,4 +104,29 @@ function normalizeBirthdate(dateStr) {
   return date.toISOString()
 }
 
-export { formatDate, formatVisitDate, formatBirthdate, normalizeBirthdate }
+// I bet it'll be easier to have this shit on the backend
+function normalizeData(data) {
+  const req = data
+  req.sex = Number(req.sex)
+  req.birthdate = normalizeBirthdate(req.birthdate)
+  req.is_local = !req.has_moved
+  return req
+}
+
+function convertData(data) {
+  const req = data
+  if (data.is_local !== undefined) {
+    req.has_moved = !req.is_local
+  }
+  req.birthdate = data.birthdate.slice(0, 10)
+  return req
+}
+
+export {
+  formatDate,
+  formatVisitDate,
+  formatBirthdate,
+  normalizeBirthdate,
+  normalizeData,
+  convertData,
+}

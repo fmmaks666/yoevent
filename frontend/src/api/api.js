@@ -1,4 +1,4 @@
-import { normalizeBirthdate } from '../utils/utils.js'
+import { normalizeData } from '../utils/utils.js'
 
 const API = import.meta.env.VITE_BACKEND_URL
 
@@ -25,9 +25,7 @@ async function postVisit(event_id, visitor) {
 }
 
 async function postVisitor(data) {
-  const req = data
-  req.sex = Number(req.sex)
-  req.birthdate = normalizeBirthdate(req.birthdate)
+  const req = normalizeData(data)
   const json = JSON.stringify(req)
   return fetch(`${API}/visitor`, {
     method: 'POST',
@@ -39,9 +37,7 @@ async function postVisitor(data) {
 }
 
 async function updateVisitor(data) {
-  const req = data
-  req.sex = Number(req.sex)
-  req.birthdate = normalizeBirthdate(req.birthdate)
+  const req = normalizeData(data)
   const json = JSON.stringify(req)
   return fetch(`${API}/visitor`, {
     method: 'PUT',
