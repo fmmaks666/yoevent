@@ -135,10 +135,10 @@ func (h *Handler) createVisit(ctx *gin.Context) {
 	if *event.IsOnetime && event.Date.Compare(time.Now()) == 1 || event.IsCancelled {
 		h.sendError(ctx, 400, "The event didn't yet happen or is cancelled")
 		return
-	} else if *event.IsOnetime && time.Now().After(event.Date.Add(timeout)) {
+	} /* else if *event.IsOnetime && time.Now().After(event.Date.Add(timeout)) {
 		h.sendError(ctx, 400, "It's too late to add a visit")
 		return
-	}
+	} */
 
 	// TODO: Holy fuck's sake optimize this
 	var date time.Time
