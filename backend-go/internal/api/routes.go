@@ -129,7 +129,7 @@ func (h *Handler) createVisit(ctx *gin.Context) {
 	// One day timeout
 	// What the fuck
 
-	loc := time.UTC
+	// loc := time.UTC
 
 	// timeout := time.Date(1970, time.January, 2, 0, 0, 0, 0, loc).Sub(time.Date(1970, time.January, 1, 0, 0, 0, 0, loc))
 	if *event.IsOnetime && event.Date.Compare(time.Now()) == 1 || event.IsCancelled {
