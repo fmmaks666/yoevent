@@ -131,7 +131,7 @@ func (h *Handler) createVisit(ctx *gin.Context) {
 
 	loc := time.UTC
 
-	timeout := time.Date(1970, time.January, 2, 0, 0, 0, 0, loc).Sub(time.Date(1970, time.January, 1, 0, 0, 0, 0, loc))
+	// timeout := time.Date(1970, time.January, 2, 0, 0, 0, 0, loc).Sub(time.Date(1970, time.January, 1, 0, 0, 0, 0, loc))
 	if *event.IsOnetime && event.Date.Compare(time.Now()) == 1 || event.IsCancelled {
 		h.sendError(ctx, 400, "The event didn't yet happen or is cancelled")
 		return
