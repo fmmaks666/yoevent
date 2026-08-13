@@ -42,7 +42,7 @@ if (!authToken || authToken === btoa(':')) {
 // TODO: Make sure that the redirect works
 watch(isError, (failed) => {
   if (failed) {
-    console.log(error?.message)
+    console.error(error?.message)
     setAuthToken('', '')
     router.push('/admin/login')
   }

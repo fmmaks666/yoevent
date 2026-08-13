@@ -122,6 +122,21 @@ function convertData(data) {
   return req
 }
 
+function defaultData() {
+  return {
+    visitor: '',
+    first_name: '',
+    last_name: '',
+    patronymic: '',
+    phone_number: '',
+    sex: 1,
+    birthdate: undefined,
+    is_local: true,
+    is_disabled: false,
+    agreed_to_privacy: false,
+  }
+}
+
 export {
   formatDate,
   formatVisitDate,
@@ -129,4 +144,5 @@ export {
   normalizeBirthdate,
   normalizeData,
   convertData,
+  defaultData,
 }

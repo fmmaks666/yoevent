@@ -84,7 +84,6 @@ async function onAction(id) {
 }
 
 async function createEvent(data) {
-  console.log(data)
   await mutateEvent(data)
   client.invalidateQueries({ queryKey: ['events'] })
   client.invalidateQueries({ queryKey: ['admin', 'events'] })

@@ -2,7 +2,14 @@
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
-import { getEvent, checkAuth, downloadVisits, getEventStats, updateEvent } from '../api/api.js'
+import {
+  getEvent,
+  checkAuth,
+  downloadVisits,
+  getEventStats,
+  updateEvent,
+  postVisit,
+} from '../api/api.js'
 import { useAppStore } from '../stores/app.js'
 import AdminView from './AdminView.vue'
 import AdminForm from '../components/AdminForm.vue'
@@ -14,6 +21,7 @@ import Spinner from '../components/Spinner.vue'
 import Card from '../components/Card.vue'
 import Stats from '../components/Stats.vue'
 import DateChooser from '../components/DateChooser.vue'
+import AddVisitorForm from '../components/AddVisitorForm.vue'
 
 const { authToken, setAuthToken, getData } = useAppStore()
 
@@ -93,6 +101,24 @@ const {
   },
 })
 
+const {
+  mutateAsync: addVisit,
+  data: visitResult,
+  isPending: isPendingVisit,
+  isError: isErrorVisit,
+  error: errorVisit,
+} = useMutation({
+  mutationFn: async (hash) => {
+    const res = await postVisit(eventData.value.event_id, hash)
+    const json = await res.json()
+
+    if (json && json.error) {
+      throw new Error(json.error)
+    }
+    return json
+  },
+})
+
 async function onStats() {
   try {
     const id = eventData.value.event_id
@@ -129,6 +155,14 @@ async function onSubmitted(data) {
   await update(newEvent)
   client.invalidateQueries({ queryKey: ['event'] })
   isEditing.value = false
+}
+
+async function addVisitor(hash) {
+  try {
+    await addVisit(hash)
+  } catch (e) {
+    console.error(e)
+  }
 }
 </script>
 
@@ -167,6 +201,10 @@ async function onSubmitted(data) {
       <button data-variant="secondary" @click="onDownload">Список відвідувачів</button>
     </div>
     <Stats v-if="!isPendingStats && !isErrorStats && stats" :data="stats" />
+
+    <AddVisitorForm @submit="addVisitor" class="add-visitor" />
+    <Spinner v-if="isPendingVisit" />
+    <ErrorBox v-if="isErrorVisit" :message="errorVisit?.message" />
   </AdminView>
 </template>
 
@@ -195,6 +233,10 @@ h2 {
   justify-content: center;
   margin-top: 8px;
   margin-bottom: 8px;
+}
+
+.add-visitor {
+  margin: 8px auto;
 }
 
 .spinner {

@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, toRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router' // IDEA: Move this logic to DataView
 import { useMutation } from '@tanstack/vue-query'
 import { useAppStore } from '../stores/app.js'
@@ -7,15 +7,24 @@ import { postVisitor, updateVisitor } from '../api/api.js'
 import ErrorBox from '../components/ErrorBox.vue'
 import Spinner from '../components/Spinner.vue'
 import DataOverview from '../components/DataOverview.vue'
-import { convertData } from '../utils/utils.js'
+import { convertData, defaultData } from '../utils/utils.js'
 
+const props = defineProps({
+  data: {
+    type: Object,
+    required: true,
+  },
+  cancelable: {
+    type: Boolean,
+    required: true,
+  },
+})
 const emit = defineEmits(['submit', 'cancel'])
 
 const router = useRouter()
 const route = useRoute()
 
-const { authToken, visitorData, getData, setData } = useAppStore()
-const { mutateAsync, isPending, isError, error } = useMutation({
+/* const { mutateAsync, isPending, isError, error } = useMutation({
   mutationFn: async ({ data, update = false }) => {
     const res = await (update ? updateVisitor(data) : postVisitor(data))
     const json = await res.json()
@@ -24,48 +33,15 @@ const { mutateAsync, isPending, isError, error } = useMutation({
     }
     return json
   },
-})
+})*/
 
 // TODO: SEPARATION OF DAMN CONCERNS, I WILL NEED TO REUSE THIS
 
-const data = ref({
-  visitor: '',
-  first_name: '',
-  last_name: '',
-  patronymic: '',
-  phone_number: '',
-  sex: 1,
-  birthdate: undefined,
-  is_local: true,
-  is_disabled: false,
-  agreed_to_privacy: false,
-})
-
-const oldData = getData()
-const isCancelable = ref(false)
-if (oldData && Object.keys(oldData).length > 0) {
-  isCancelable.value = true
-  data.value = convertData(oldData)
-  //data.value.birthdate = oldData.birthdate.slice(0, 10)
-}
+const data = ref(props.data !== undefined ? convertData({ ...props.data }) : defaultData())
+const isCancelable = props.cancelable
 
 async function onSubmit() {
-  // Make a request to fucking get the hash
-  try {
-    // TODO: INVALIDATE BS
-    data.value.hash = getData().visitor
-    const resData = await mutateAsync({ data: data.value, update: isCancelable.value })
-    data.value.visitor = resData['visitor']
-    setData(data.value)
-
-    if (route.query.event) {
-      router.push(`/v/${route.query.event}`)
-    } else {
-      emit('submit')
-    }
-  } catch (e) {
-    console.error(e)
-  }
+  emit('submit', data.value)
 }
 </script>
 
@@ -137,12 +113,6 @@ async function onSubmit() {
 
     <!-- <input type="submit" value="Нова людина" /> -->
   </form>
-  <div v-if="isError">
-    <ErrorBox :message="error?.message" />
-  </div>
-  <div v-if="isPending" class="spinner">
-    <Spinner />
-  </div>
 </template>
 
 <style scoped>

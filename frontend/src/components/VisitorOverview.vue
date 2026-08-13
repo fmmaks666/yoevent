@@ -11,6 +11,10 @@ defineProps({
 })
 
 const showMore = ref(false)
+
+async function copyId(hash) {
+  await window.navigator.clipboard.writeText(hash)
+}
 </script>
 
 <template>
@@ -36,7 +40,7 @@ const showMore = ref(false)
       <button @click="showMore = !showMore" data-variant="secondary">
         {{ showMore ? 'Менше' : 'Більше' }}
       </button>
-      <!--<button @click="">Скопіювати ID</button>-->
+      <button @click="copyId(data.hash)" data-variant="secondary">Скопіювати ID</button>
     </div>
   </Card>
 </template>
