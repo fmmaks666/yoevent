@@ -118,7 +118,7 @@ function convertData(data) {
   if (data.is_local !== undefined) {
     req.has_moved = !req.is_local
   }
-  req.birthdate = data.birthdate.slice(0, 10)
+  if (req.birthdate) req.birthdate = data.birthdate.slice(0, 10)
   return req
 }
 

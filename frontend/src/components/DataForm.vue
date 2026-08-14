@@ -18,6 +18,11 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  showGreeting: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
 })
 const emit = defineEmits(['submit', 'cancel'])
 
@@ -39,6 +44,7 @@ const route = useRoute()
 
 const data = ref(props.data !== undefined ? convertData({ ...props.data }) : defaultData())
 const isCancelable = props.cancelable
+const showGreeting = props.showGreeting
 
 async function onSubmit() {
   emit('submit', data.value)
@@ -46,8 +52,10 @@ async function onSubmit() {
 </script>
 
 <template>
-  <h1 v-if="data.first_name">Привіт, {{ data.first_name }}</h1>
-  <h1 v-else>Ваші дані</h1>
+  <template v-if="showGreeting">
+    <h1 v-if="data.first_name">Привіт, {{ data.first_name }}</h1>
+    <h1 v-else>Ваші дані</h1>
+  </template>
   <form @submit.prevent="onSubmit()">
     <label for="name">ПІБ</label>
     <input type="text" v-model.trim="data.last_name" placeholder="Прізвище" id="name" required />
