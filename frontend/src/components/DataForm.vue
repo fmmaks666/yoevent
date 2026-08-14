@@ -11,7 +11,7 @@ import { convertData, defaultData } from '../utils/utils.js'
 
 const props = defineProps({
   data: {
-    type: Object,
+    //type: Object, nullable
     required: true,
   },
   cancelable: {
