@@ -18,7 +18,7 @@ const editing = ref(false)
 const { authToken, visitorData, getData, setData } = useAppStore()
 const { mutateAsync, isPending, isError, error } = useMutation({
   mutationFn: async ({ data, update = false }) => {
-    const res = await (update && data.hash ? updateVisitor(data) : postVisitor(data))
+    const res = await (update ? updateVisitor(data) : postVisitor(data))
     const json = await res.json()
     if (json && json.error) {
       throw new Error(json.error)
@@ -42,7 +42,8 @@ async function onSubmit(d) {
     // TODO: INVALIDATE BS
     data.value.hash = getData().visitor // WHY
     d.hash = getData().visitor
-    const resData = await mutateAsync({ data: d, update: isCancelable.value })
+    const update = getData().visitor !== '' && getData().visitor !== undefined && isCancelable.value
+    const resData = await mutateAsync({ data: d, update: update })
     if (isError.value) return
     data.value.visitor = resData['visitor']
     setData(convertData(resData))
