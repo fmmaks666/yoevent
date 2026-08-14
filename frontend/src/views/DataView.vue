@@ -18,7 +18,7 @@ const editing = ref(false)
 const { authToken, visitorData, getData, setData } = useAppStore()
 const { mutateAsync, isPending, isError, error } = useMutation({
   mutationFn: async ({ data, update = false }) => {
-    const res = await (update && data.hash !== '' ? updateVisitor(data) : postVisitor(data))
+    const res = await (update && data.hash ? updateVisitor(data) : postVisitor(data))
     const json = await res.json()
     if (json && json.error) {
       throw new Error(json.error)
