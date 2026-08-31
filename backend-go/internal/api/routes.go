@@ -331,7 +331,8 @@ func (h *Handler) getVisits(ctx *gin.Context) {
 	//		return nil
 	//}).Offset(offset).Limit(models.PerPage).Find(ctx)
 
-	base := gorm.G[models.Visit](h.db).Table("visits_with_age").Joins(clause.InnerJoin.Association("Event"), func(db gorm.JoinBuilder, joinTable, curTable clause.Table) error {
+	// This used to be just models.Visits and GORM just ignored the age field lol
+	base := gorm.G[models.VisitWithAge](h.db).Table("visits_with_age").Joins(clause.InnerJoin.Association("Event"), func(db gorm.JoinBuilder, joinTable, curTable clause.Table) error {
 		db.Where("public_id = ?", req.EventID)
 		return nil
 	})
@@ -406,7 +407,7 @@ func (h *Handler) getStats(ctx *gin.Context) {
 	id := event.ID
 	stats := models.GetEventStatsResponse{}
 
-	base := gorm.G[models.Visit](h.db).Table("visits_with_age").Distinct("visitor_id").Where("event_id = ?", id).Joins(clause.LeftJoin.Association("Visitor"), nil)
+	base := gorm.G[models.VisitWithAge](h.db).Table("visits_with_age").Distinct("visitor_id").Where("event_id = ?", id).Joins(clause.LeftJoin.Association("Visitor"), nil)
 	if !*req.All {
 		base = base.Where("strftime('%m', visit_date) = ? AND strftime('%Y', visit_date) = ?", fmt.Sprintf("%02d", req.Month), strconv.Itoa(req.Year))
 	}
