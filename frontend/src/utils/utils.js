@@ -137,6 +137,15 @@ function defaultData() {
   }
 }
 
+function sortEvents(ev) {
+  const onetime = ev.filter((e) => e.is_onetime)
+  const regular = ev.filter((e) => !e.is_onetime)
+  onetime.sort((l, r) => new Date(l.date) < new Date(r.date))
+  regular.sort((l, r) => l.weekday > r.weekday)
+  const events = [...onetime, ...regular]
+  return events
+}
+
 export {
   formatDate,
   formatVisitDate,
@@ -145,4 +154,5 @@ export {
   normalizeData,
   convertData,
   defaultData,
+  sortEvents,
 }

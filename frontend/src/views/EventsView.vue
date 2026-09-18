@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { getEvents, postVisit } from '../api/api.js'
-import { formatDate } from '../utils/utils.js'
+import { formatDate, sortEvents } from '../utils/utils.js'
 import { useAppStore } from '../stores/app.js'
 import Event from '../components/Event.vue'
 import ErrorBox from '../components/ErrorBox.vue'
@@ -24,7 +24,7 @@ const { data, isPending, isError, error } = useQuery({
     if (json && json.error) {
       throw new Error(json.error)
     }
-    return json
+    return sortEvents(json)
   },
 })
 

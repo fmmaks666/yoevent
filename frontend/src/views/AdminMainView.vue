@@ -3,7 +3,7 @@ import { watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { getEventsAdmin, checkAuth, postEvent, downloadVisits } from '../api/api.js'
-import { formatDate } from '../utils/utils.js'
+import { formatDate, sortEvents } from '../utils/utils.js'
 import { useAppStore } from '../stores/app.js'
 import AdminView from './AdminView.vue'
 import AdminForm from '../components/AdminForm.vue'
@@ -48,7 +48,7 @@ const {
     if (json && json.error) {
       throw new Error(json.error)
     }
-    return json
+    return sortEvents(json)
   },
 })
 
