@@ -102,6 +102,7 @@ function isVisited(e) {
 <template>
   <main>
     <h2>Події</h2>
+    <h3>У вільному просторі "YO!"</h3>
     <ErrorBox v-if="isErrorEvent" :message="errorEvent?.message" class="event-error" />
     <div class="list">
       <Spinner v-if="isPending" class="spinner" />
@@ -129,7 +130,10 @@ function isVisited(e) {
 h2,
 h3 {
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 8px;
+}
+h3 {
+  margin-bottom: 16px;
 }
 
 .list {
@@ -152,8 +156,8 @@ main {
 }
 
 @media (min-width: 1024px) {
-  h2 {
-    margin-bottom: 5rem;
+  h3 {
+    margin-bottom: 64px;
   }
 
   .list {
