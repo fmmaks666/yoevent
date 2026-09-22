@@ -75,7 +75,7 @@ function formatData(data) {
     // PUT the properly formatted string here!!
     // yyyy-mm-ddThh:mm
   */
-    formatted.date = toLocalTime(date) // formatted.date.slice(0, 16)
+    formatted.date = toLocalTime(data.date) // formatted.date.slice(0, 16)
     return formatted
   }
   const date = new Date(data.time)

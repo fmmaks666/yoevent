@@ -153,7 +153,9 @@ function sortEvents(ev) {
   return events
 }
 
-function toLocalTime(date) {
+function toLocalTime(dateStr) {
+  const dt = dayjs(dateStr)
+  console.log(dt)
   const fmt = new Intl.DateTimeFormat('utc', {
     timeZone: 'Europe/Kyiv',
     year: 'numeric',
@@ -165,12 +167,11 @@ function toLocalTime(date) {
   })
 
   // 09/21/2026, 15:50
-  const utc = fmt.format(date)
-  const [dateSeg, timeSeg] = utc.split(', ')
-  const [month, day, year] = dateSeg.split('/')
-  const [hour, min] = timeSeg.split(':')
+  const parts = fmt.formatToParts(dt.tz('Europe/Kyiv').toDate())
+  const d = {}
+  parts.forEach((p) => (d[p.type] = p.value))
 
-  return `${year}-${month}-${day}T${hour}:${min}`
+  return `${d.year}-${d.month}-${d.day}T${d.hour}:${d.minute}`
 }
 
 function toUTC(date) {
