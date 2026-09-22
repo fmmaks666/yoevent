@@ -155,7 +155,6 @@ function sortEvents(ev) {
 
 function toLocalTime(dateStr) {
   const dt = dayjs(dateStr)
-  console.log(dt)
   const fmt = new Intl.DateTimeFormat('utc', {
     timeZone: 'Europe/Kyiv',
     year: 'numeric',
