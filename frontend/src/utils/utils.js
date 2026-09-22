@@ -1,3 +1,9 @@
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
 function formatDate(eventData) {
   const fmt = new Intl.DateTimeFormat('uk-UA', {
     dateStyle: 'full',
@@ -53,6 +59,7 @@ function formatDate(eventData) {
   }
 }
 
+// TODO: Fix this ass
 function formatVisitDate(visit) {
   const fmt = new Intl.DateTimeFormat('uk-UA', {
     dateStyle: 'full',
@@ -146,6 +153,31 @@ function sortEvents(ev) {
   return events
 }
 
+function toLocalTime(date) {
+  const fmt = new Intl.DateTimeFormat('utc', {
+    timeZone: 'Europe/Kyiv',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+
+  // 09/21/2026, 15:50
+  const utc = fmt.format(date)
+  const [dateSeg, timeSeg] = utc.split(', ')
+  const [month, day, year] = dateSeg.split('/')
+  const [hour, min] = timeSeg.split(':')
+
+  return `${year}-${month}-${day}T${hour}:${min}`
+}
+
+function toUTC(date) {
+  const local = dayjs.tz(date, 'Europe/Kyiv')
+  return local.toDate().toISOString()
+}
+
 export {
   formatDate,
   formatVisitDate,
@@ -155,4 +187,6 @@ export {
   convertData,
   defaultData,
   sortEvents,
+  toLocalTime,
+  toUTC,
 }

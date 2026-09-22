@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router' // IDEA: Move this logic to Dat
 import { useMutation } from '@tanstack/vue-query'
 import { useAppStore } from '../stores/app.js'
 import { postVisitor } from '../api/api.js'
+import { toLocalTime, toUTC } from '../utils/utils.js'
 import ErrorBox from '../components/ErrorBox.vue'
 import Spinner from '../components/Spinner.vue'
 import DataOverview from '../components/DataOverview.vue'
@@ -62,11 +63,19 @@ async function onSubmit() {
 }
 
 function formatData(data) {
+  // The date's in UTC therefore we convert it to LOCAL TIME
   if (data.is_onetime) {
     const formatted = { ...data }
     const date = new Date(data.date)
+    /*const [hour, min] = toLocalTime(date)
+    date.setHours(hour)
+    date.setMinutes(min)
     // TODO: Fix time: it's in UTC
-    formatted.date = formatted.date.slice(0, 16)
+    console.log(data.date, hour, min, date, date.toISOString())
+    // PUT the properly formatted string here!!
+    // yyyy-mm-ddThh:mm
+  */
+    formatted.date = toLocalTime(date) // formatted.date.slice(0, 16)
     return formatted
   }
   const date = new Date(data.time)
@@ -79,15 +88,21 @@ function formatData(data) {
 }
 
 function normalizeData(data) {
+  // FUCK JS
+  // We get this shoot in LOCAL TIME, therefore we have to convert it to UTC
   if (data.is_onetime) {
-    const [dateSeg, timeSeg] = data.date.split('T')
+    /* const [dateSeg, timeSeg] = data.date.split('T')
     const [year, month, day] = dateSeg.split('-').map(Number)
     const [hour, min] = timeSeg.split(':').map(Number)
 
-    const date = new Date(year, month - 1, day, hour, min)
+    // Convert damn hours and mins to Euriope/Kyiv
+
+    const date = new Date(year, month - 1, day, hour, min) */
     const normalized = { ...data }
     normalized.time = null
-    normalized.date = date.toISOString()
+    // TODO: Basically we need to replace this fucked up line
+    //normalized.date = date.toISOString()
+    normalized.date = toUTC(data.date)
     return normalized
   }
   const [hour, min] = data.time.split(':')
