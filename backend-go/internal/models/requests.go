@@ -52,3 +52,7 @@ type GetVisitsRequest struct {
 	All     *bool  `json:"all" binding:"required" form:"all"`
 	DateRange
 }
+
+type DeleteEvent struct {
+	EventID string `json:"event_id" binding:"required" form:"event_id"`
+}

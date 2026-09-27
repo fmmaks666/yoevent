@@ -106,6 +106,18 @@ async function updateEvent(token, data) {
   })
 }
 
+async function doDeleteEvent(token, eventId) {
+  const params = new URLSearchParams({
+    event_id: eventId,
+  })
+  return fetch(`${API}/admin/event?${params.toString()}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Basic ${token}`,
+    },
+  })
+}
+
 async function downloadVisits(token, eventId, date, all = false) {
   const params = new URLSearchParams({
     event_id: eventId,
@@ -148,4 +160,5 @@ export {
   updateEvent,
   downloadVisits,
   getEventStats,
+  doDeleteEvent,
 }

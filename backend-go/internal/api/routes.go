@@ -587,6 +587,26 @@ func (h *Handler) updateEvent(ctx *gin.Context) {
 	ctx.JSON(200, event.ToDTO())
 }
 
+func (h *Handler) deleteEvent(ctx *gin.Context) {
+	var req models.DeleteEvent
+
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		h.sendError(ctx, 400, "Malformed request: "+err.Error())
+		return
+	}
+
+	event, err := gorm.G[models.Event](h.db).Where("public_id = ?", req.EventID).First(ctx) // HUH, Okay gotta use this context
+	_, err = gorm.G[models.Visit](h.db).Where("event_id = ?", event.ID).Delete(ctx)
+	_, err = gorm.G[models.Event](h.db).Where("public_id = ?", req.EventID).Delete(ctx)
+
+	if err != nil {
+		h.sendError(ctx, 404, err.Error())
+		return
+	}
+
+	ctx.JSON(204, nil)
+}
+
 func Setup(db *gorm.DB, adminPass, frontendUrl, salt string) *gin.Engine {
 	handler := Handler{db, salt}
 
@@ -616,6 +636,7 @@ func Setup(db *gorm.DB, adminPass, frontendUrl, salt string) *gin.Engine {
 	admin.GET("/visitors", handler.getVisitors)
 	admin.POST("/event", handler.createEvent)
 	admin.PUT("/event", handler.updateEvent)
+	admin.DELETE("event", handler.deleteEvent)
 
 	return router
 }

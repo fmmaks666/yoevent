@@ -24,7 +24,7 @@ defineProps({
       >
       <br />
       Статус: Носії обов'язків: <span class="focus">{{ data.members }}</span> <br />
-      Стать: Чоловіки': <span class="focus">{{ data.men }}</span> <br />
+      Стать: Чоловіки: <span class="focus">{{ data.men }}</span> <br />
       Стать: Жінки: <span class="focus">{{ data.women }}</span> <br />
       Стать: Інше: <span class="focus">—</span> <br />
       Кількість жінок до 30 років: <span class="focus">{{ data.women_below_30 }}</span> <br />

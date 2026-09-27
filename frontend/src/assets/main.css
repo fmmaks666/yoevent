@@ -48,6 +48,22 @@ button[data-variant='secondary']:active {
   filter: drop-shadow(0rem 0.05rem 0.08rem gray);
 }
 
+button[data-variant='destructive'] {
+  color: var(--color-text);
+  font-weight: 600;
+  background: transparent;
+  transition: 0.2s ease-in-out;
+  filter: none;
+  border: 2px solid var(--color-border-error);
+  border-radius: 32px;
+}
+
+button[data-variant='destructive']:active {
+  color: var(--color-text);
+  background: var(--color-background-error);
+  filter: drop-shadow(0rem 0.05rem 0.08rem gray);
+}
+
 /* InputText & InputTel & InputNumber */
 
 input[type='text'],
@@ -156,6 +172,12 @@ a,
   button[data-variant='secondary']:hover {
     filter: drop-shadow(0rem 0.05rem 0.2rem black);
     background: var(--color-background-mute);
+  }
+
+  button[data-variant='destructive']:hover {
+    color: var(--vt-c-white);
+    filter: drop-shadow(0rem 0.05rem 0.2rem black);
+    background: var(--color-background-error);
   }
 
   input[type='text']:hover,

@@ -116,6 +116,8 @@ type VisitWithAge struct {
 	Age int
 }
 
+/* TODO
+
 type Registration struct {
 	gorm.Model
 	EventID          uint       `gorm:"not null"`
@@ -149,6 +151,8 @@ type EventRegistration struct {
 	Friend       *EventRegistration `gorm:"foreignKey:FriendRegistrationID;"`
 }
 
+*/
+
 func createVisitsView(db *gorm.DB) {
 	// LOVE Hardcoding table names lol
 	db.Exec(`CREATE VIEW IF NOT EXISTS visits_with_age AS
@@ -176,5 +180,5 @@ func Setup(db *gorm.DB) {
 	db.AutoMigrate(&Visitor{})
 	db.AutoMigrate(&Visit{})
 	createVisitsView(db)
-	createRegistrationsView(db)
+	//createRegistrationsView(db)
 }

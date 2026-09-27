@@ -9,6 +9,7 @@ import {
   getEventStats,
   updateEvent,
   postVisit,
+  doDeleteEvent,
 } from '../api/api.js'
 import { useAppStore } from '../stores/app.js'
 import AdminView from './AdminView.vue'
@@ -22,6 +23,7 @@ import Card from '../components/Card.vue'
 import Stats from '../components/Stats.vue'
 import DateChooser from '../components/DateChooser.vue'
 import AddVisitorForm from '../components/AddVisitorForm.vue'
+import DeleteButton from '../components/DeleteButton.vue'
 
 const { authToken, setAuthToken, getData } = useAppStore()
 
@@ -63,6 +65,25 @@ const {
       throw new Error(json.error)
     }
     return json
+  },
+})
+
+const {
+  data: deleted,
+  mutateAsync: requestDelete,
+  isPending: isPendingDelete,
+  isError: isErrorDelete,
+  error: errorDelete,
+} = useMutation({
+  mutationFn: async (eventId) => {
+    const res = await doDeleteEvent(authToken, eventId)
+    if (!res.ok) {
+      const json = await res.json()
+      if (json && json.error) {
+        throw new Error(json.error)
+      }
+    }
+    return {}
   },
 })
 
@@ -164,6 +185,18 @@ async function addVisitor(hash) {
     console.error(e)
   }
 }
+
+async function deleteEvent() {
+  try {
+    const id = eventData.value.event_id
+    await requestDelete(id)
+    client.invalidateQueries({ queryKey: ['events'] })
+    client.invalidateQueries({ queryKey: ['admin', 'events'] })
+    router.go(-1) //TODO: Check whether this works fine
+  } catch (e) {
+    console.error(e)
+  }
+}
 </script>
 
 <template>
@@ -204,7 +237,9 @@ async function addVisitor(hash) {
 
     <AddVisitorForm @submit="addVisitor" class="add-visitor" />
     <Spinner v-if="isPendingVisit" />
-    <ErrorBox v-if="isErrorVisit" :message="errorVisit?.message" />
+    <DeleteButton @delete="deleteEvent" label="Видалити подію" class="delete-button" />
+    <Spinner v-if="isPendingDelete" />
+    <ErrorBox v-if="isErrorDelete" :message="errorDelete?.message" />
   </AdminView>
 </template>
 
@@ -245,6 +280,14 @@ h2 {
 
 .chooser {
   margin-bottom: 16px;
+}
+
+.delete-button {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 8px;
 }
 
 @media (min-width: 1024px) {
