@@ -19,7 +19,7 @@ type Event struct {
 	Weekday           *time.Weekday `gorm:"nullable"`
 	Time              *time.Time    `gorm:"nullable"`
 	IsPrivate         *bool         `gorm:"not null"`
-	NeedsRegistration bool          `gorm:"not null"`
+	NeedsRegistration bool          `gorm:"not null"` // TODO: OBSOLETE!
 	IsCancelled       bool          `gorm:"not null"`
 	Visits            []Visit       `gorm:"foreignKey:EventID;constraint:OnDelete:CASCADE"` //`gorm:"foreignKey:EventID;references:ID"`
 }
@@ -116,6 +116,39 @@ type VisitWithAge struct {
 	Age int
 }
 
+type Registration struct {
+	gorm.Model
+	EventID          uint       `gorm:"not null"`
+	Title            string     `gorm:"not null"`
+	MaxRegistrations uint       `gorm:"not null"`
+	Until            *time.Time `gorm:"not null"`
+	TypeID           uint       `gorm:"not null"`
+
+	Event            Event            `gorm:"foreignKey:EventID;"`
+	RegistrationType RegistrationType `gorm:"foreignKey:TypeID;"`
+}
+
+type RegistrationsWithRegistered struct {
+	Registration
+	Registered uint
+}
+
+type RegistrationType struct {
+	gorm.Model
+	Definition string `gorm:"not null"`
+}
+
+type EventRegistration struct {
+	gorm.Model
+	RegistrationID       uint `gorm:"not null"`
+	VisitorID            uint `gorm:"not null"`
+	FriendRegistrationID uint `gorm:"nullable"`
+
+	Registration Registration       `gorm:"foreignKey:RegistrationID;"`
+	Visitor      Visitor            `gorm:"foreignKey:VisitorID;"`
+	Friend       *EventRegistration `gorm:"foreignKey:FriendRegistrationID;"`
+}
+
 func createVisitsView(db *gorm.DB) {
 	// LOVE Hardcoding table names lol
 	db.Exec(`CREATE VIEW IF NOT EXISTS visits_with_age AS
@@ -128,9 +161,20 @@ func createVisitsView(db *gorm.DB) {
 		LEFT JOIN visitors v ON v.id = vi.visitor_id`)
 }
 
+func createRegistrationsView(db *gorm.DB) {
+	// LOVE Hardcoding table names lol
+	// FOR REFERENCE:
+	// SELECT COUNT(visits.event_id), visits.event_id, events.title
+	// FROM visits LEFT JOIN events ON visits.event_id = events.id GROUP BY visits.event_id ORDER BY COUNT(*) DESC;
+	db.Exec(`CREATE VIEW IF NOT EXISTS registrations_with_registered AS
+		SELECT COUNT(*) as registered
+		FROM registrations r
+		GROUP BY registration_id`)
+}
 func Setup(db *gorm.DB) {
 	db.AutoMigrate(&Event{})
 	db.AutoMigrate(&Visitor{})
 	db.AutoMigrate(&Visit{})
 	createVisitsView(db)
+	createRegistrationsView(db)
 }
