@@ -64,6 +64,26 @@ type VisitDTO struct {
 	Event EventDTO `json:"event"`
 }
 
+type RegistrationEssentialDTO struct {
+	EventID          uint       `json:"event_id" binding:"required" form:"event_id"`
+	Title            string     `json:"title" binding:"required" form:"title"`
+	Description      string     `json:"description" binding:"required" form:"description"`
+	MaxRegistrations uint       `json:"max_registrations" binding:"required" form:"max_registrations"`
+	Until            *time.Time `json:"until" binding:"required" form:"until"`
+	IsPrivate        *bool      `json:"is_private" binding:"required" form:"is_private"`
+}
+
+type RegistrationDTO struct {
+	ID uint `json:"registration_id" binding:"required" form:"registration_id"`
+	RegistrationEssentialDTO
+}
+
+type EventRegistrationDTO struct {
+	RegistrationID       uint `json:"registration_id" binding:"required" form:"registration_id"`
+	VisitorID            uint `json:"visitor_id" binding:"required" form:"visitor_id"`
+	FriendRegistrationID uint `json:"friend_registration_id" form:"friend_registration_id"`
+}
+
 type DateRange struct {
 	Month time.Month `json:"month" form:"month"`
 	Year  int        `json:"year" form:"year"`

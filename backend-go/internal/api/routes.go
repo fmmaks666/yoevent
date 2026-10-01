@@ -607,12 +607,141 @@ func (h *Handler) deleteEvent(ctx *gin.Context) {
 	ctx.JSON(204, nil)
 }
 
+func (h *Handler) createRegistration(ctx *gin.Context) {
+	var req models.CreateRegistrationRequest
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		h.sendError(ctx, 400, "Malformed request: "+err.Error())
+		return
+	}
+
+	event, err := gorm.G[models.Event](h.db).Where("public_id = ?", req.EventID).First(ctx)
+
+	if err != nil {
+		h.sendError(ctx, 404, err.Error())
+		return
+	}
+
+	eventId := event.ID
+
+	err = gorm.G[models.Registration](h.db).Create(ctx, &models.Registration{
+		EventID:          eventId,
+		Title:            req.Title,
+		Description:      req.Description,
+		Until:            req.Until,
+		IsPrivate:        req.IsPrivate,
+		MaxRegistrations: req.MaxRegistrations,
+	})
+
+	if err != nil {
+		h.sendError(ctx, 404, err.Error())
+		return
+	}
+
+	reg, err := gorm.G[models.Event](h.db).Where("event_id = ?", eventId).First(ctx)
+	if err != nil {
+		h.sendError(ctx, 404, err.Error())
+		return
+	}
+
+	ctx.JSON(200, reg.ToDTO())
+
+}
+
+func (h *Handler) updateRegistration(ctx *gin.Context) {
+	var req models.UpdateRegistrationRequest
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		h.sendError(ctx, 400, "Malformed request: "+err.Error())
+		return
+	}
+
+	event, err := gorm.G[models.Event](h.db).Where("public_id = ?", req.EventID).First(ctx)
+
+	if err != nil {
+		h.sendError(ctx, 404, err.Error())
+		return
+	}
+
+	eventId := event.ID
+
+	_, err = gorm.G[models.Registration](h.db).Updates(ctx, models.Registration{
+		EventID:          eventId,
+		Title:            req.Title,
+		Description:      req.Description,
+		Until:            req.Until,
+		IsPrivate:        req.IsPrivate,
+		MaxRegistrations: req.MaxRegistrations,
+	})
+
+	if err != nil {
+		h.sendError(ctx, 404, err.Error())
+		return
+	}
+
+	reg, err := gorm.G[models.Event](h.db).Where("event_id = ?", eventId).First(ctx)
+	if err != nil {
+		h.sendError(ctx, 404, err.Error())
+		return
+	}
+
+	ctx.JSON(200, reg.ToDTO())
+
+}
+
+func (h *Handler) deleteRegistration(ctx *gin.Context) {
+	// Don't forget to cascade
+	// TODO: Get the things working
+	var req models.DeleteEvent
+
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		h.sendError(ctx, 400, "Malformed request: "+err.Error())
+		return
+	}
+
+	event, err := gorm.G[models.Event](h.db).Where("public_id = ?", req.EventID).First(ctx) // HUH, Okay gotta use this context
+	_, err = gorm.G[models.Registration](h.db).Where("event_id = ?", event.ID).Delete(ctx)
+	_, err = gorm.G[models.EventRegistration](h.db).Where("registratio_id = ?", req.EventID).Delete(ctx)
+
+	if err != nil {
+		h.sendError(ctx, 404, err.Error())
+		return
+	}
+
+	ctx.JSON(204, nil)
+
+}
+
+func (h *Handler) createEventRegistration(ctx *gin.Context) {
+	ctx.JSON(200, nil)
+}
+
+func (h *Handler) deleteEventRegistration(ctx *gin.Context) {
+	ctx.JSON(200, nil)
+}
+
+func (h *Handler) getRegistrationsRaw(ctx *gin.Context, hidePrivate bool) {
+	ctx.JSON(200, nil)
+}
+
+func (h *Handler) getRegistrations(ctx *gin.Context) {
+	h.getRegistrationsRaw(ctx, true)
+}
+
+func (h *Handler) getAdminRegistrations(ctx *gin.Context) {
+	h.getRegistrationsRaw(ctx, false)
+}
+
+func (h *Handler) getEventRegistrations(ctx *gin.Context) {
+	ctx.JSON(200, nil)
+}
+
 func Setup(db *gorm.DB, adminPass, frontendUrl, salt string) *gin.Engine {
 	handler := Handler{db, salt}
 
 	router := gin.Default()
 	conf := cors.Config{
-		AllowOrigins:     []string{frontendUrl}, // TODO: I Don't need to say this but the thing into an env file
+		AllowOrigins:     []string{frontendUrl},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Content-Length", "Accept", "Authorization"},
 		AllowCredentials: true,
@@ -625,6 +754,10 @@ func Setup(db *gorm.DB, adminPass, frontendUrl, salt string) *gin.Engine {
 	router.POST("/visitor", handler.createVisitor)
 	router.PUT("/visitor", handler.updateVisitor)
 	router.POST("/visit", handler.createVisit)
+	router.POST("/registration", handler.createEventRegistration)
+	router.DELETE("/registration", handler.deleteEventRegistration)
+	router.GET("/registrations", nil)
+
 	admin := router.Group("/admin")
 	admin.Use(gin.BasicAuth(gin.Accounts{
 		"admin": adminPass,
@@ -637,6 +770,10 @@ func Setup(db *gorm.DB, adminPass, frontendUrl, salt string) *gin.Engine {
 	admin.POST("/event", handler.createEvent)
 	admin.PUT("/event", handler.updateEvent)
 	admin.DELETE("event", handler.deleteEvent)
+	admin.POST("/registration", handler.createRegistration)
+	admin.PUT("/registration", handler.updateRegistration)
+	admin.DELETE("/registration", handler.deleteRegistration)
+	admin.GET("/registrations", nil)
 
 	return router
 }

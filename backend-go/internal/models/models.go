@@ -116,28 +116,37 @@ type VisitWithAge struct {
 	Age int
 }
 
-/* TODO
-
+// NOTE: ONE registration FOR EACH event
 type Registration struct {
 	gorm.Model
-	EventID          uint       `gorm:"not null"`
+	EventID          uint       `gorm:"not null;unique;secondaryKey"`
 	Title            string     `gorm:"not null"`
+	Description      string     `gorm:"not null"`
 	MaxRegistrations uint       `gorm:"not null"`
 	Until            *time.Time `gorm:"not null"`
-	TypeID           uint       `gorm:"not null"`
+	IsPrivate        *bool      `gorm:"not null;default:false"`
 
-	Event            Event            `gorm:"foreignKey:EventID;"`
-	RegistrationType RegistrationType `gorm:"foreignKey:TypeID;"`
+	Event         Event               `gorm:"foreignKey:EventID;"`
+	Registrations []EventRegistration `gorm:"foreignKey:RegistrationID;constraint:OnDelete:CASCADE"`
 }
 
-type RegistrationsWithRegistered struct {
+func (r *Registration) ToDTO() RegistrationDTO {
+	return RegistrationDTO{
+		ID: r.Model.ID,
+		RegistrationEssentialDTO: RegistrationEssentialDTO{
+			EventID:          r.EventID,
+			Title:            r.Title,
+			Description:      r.Description,
+			Until:            r.Until,
+			MaxRegistrations: r.MaxRegistrations,
+			IsPrivate:        r.IsPrivate,
+		},
+	}
+}
+
+type RegistrationWithCount struct {
 	Registration
 	Registered uint
-}
-
-type RegistrationType struct {
-	gorm.Model
-	Definition string `gorm:"not null"`
 }
 
 type EventRegistration struct {
@@ -150,8 +159,6 @@ type EventRegistration struct {
 	Visitor      Visitor            `gorm:"foreignKey:VisitorID;"`
 	Friend       *EventRegistration `gorm:"foreignKey:FriendRegistrationID;"`
 }
-
-*/
 
 func createVisitsView(db *gorm.DB) {
 	// LOVE Hardcoding table names lol
@@ -170,15 +177,13 @@ func createRegistrationsView(db *gorm.DB) {
 	// FOR REFERENCE:
 	// SELECT COUNT(visits.event_id), visits.event_id, events.title
 	// FROM visits LEFT JOIN events ON visits.event_id = events.id GROUP BY visits.event_id ORDER BY COUNT(*) DESC;
-	db.Exec(`CREATE VIEW IF NOT EXISTS registrations_with_registered AS
-		SELECT COUNT(*) as registered
-		FROM registrations r
-		GROUP BY registration_id`)
+	db.Exec(`CREATE VIEW registrations_with_count AS SELECT r.*, (SELECT COUNT(*) FROM event_registrations er WHERE er.registration_id = r.id) as registered FROM registations r;
+	`)
 }
 func Setup(db *gorm.DB) {
 	db.AutoMigrate(&Event{})
 	db.AutoMigrate(&Visitor{})
 	db.AutoMigrate(&Visit{})
 	createVisitsView(db)
-	//createRegistrationsView(db)
+	createRegistrationsView(db)
 }
