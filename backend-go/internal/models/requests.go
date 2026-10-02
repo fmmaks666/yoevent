@@ -26,6 +26,25 @@ type CreateRegistrationRequest struct {
 
 type UpdateRegistrationRequest = CreateRegistrationRequest
 
+type DeleteRegistrationRequest struct {
+	RegistrationID uint `json:"registration_id" binding:"required" form:"registration_id"`
+}
+
+type CreateEventRegistrationRequest struct {
+	RegistrationID uint     `json:"registration_id" binding:"required" form:"registration_id"`
+	Hash           string   `json:"visitor" binding:"required" form:"visitor"`
+	Friends        []string `json:"friends" form:"friends"`
+}
+
+type DeleteEventRegistrationRequest struct {
+	EventRegistrationID uint   `json:"event_registration_id" binding:"required" form:"event_registration_id"`
+	Hash                string `json:"visitor" binding:"required" form:"visitor"`
+}
+
+type GetEventRegistrationsRequest struct {
+	RegistrationID uint `json:"registration_id" binding:"required" form:"registration_id"`
+}
+
 type GetVisitorVisitsRequest struct {
 	Hash string `json:"hash"`
 	VisitorEssentialDTO
@@ -66,6 +85,6 @@ type GetVisitsRequest struct {
 	DateRange
 }
 
-type DeleteEvent struct {
+type DeleteEventRequest struct {
 	EventID string `json:"event_id" binding:"required" form:"event_id"`
 }

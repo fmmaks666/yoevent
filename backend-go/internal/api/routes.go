@@ -588,7 +588,7 @@ func (h *Handler) updateEvent(ctx *gin.Context) {
 }
 
 func (h *Handler) deleteEvent(ctx *gin.Context) {
-	var req models.DeleteEvent
+	var req models.DeleteEventRequest
 
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		h.sendError(ctx, 400, "Malformed request: "+err.Error())
@@ -691,17 +691,20 @@ func (h *Handler) updateRegistration(ctx *gin.Context) {
 
 func (h *Handler) deleteRegistration(ctx *gin.Context) {
 	// Don't forget to cascade
-	// TODO: Get the things working
-	var req models.DeleteEvent
+	var req models.DeleteRegistrationRequest
 
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		h.sendError(ctx, 400, "Malformed request: "+err.Error())
 		return
 	}
 
-	event, err := gorm.G[models.Event](h.db).Where("public_id = ?", req.EventID).First(ctx) // HUH, Okay gotta use this context
-	_, err = gorm.G[models.Registration](h.db).Where("event_id = ?", event.ID).Delete(ctx)
-	_, err = gorm.G[models.EventRegistration](h.db).Where("registratio_id = ?", req.EventID).Delete(ctx)
+	_, err := gorm.G[models.Registration](h.db).Where("id = ?", req.RegistrationID).First(ctx)
+	// event, err := gorm.G[models.Event](h.db).Where("id = ?", reg.EventID).First(ctx) // HUH, Okay gotta use this context
+	if err != nil {
+		h.sendError(ctx, 404, err.Error()) // It doesn't exist
+	}
+	_, err = gorm.G[models.Registration](h.db).Where("id = ?", req.RegistrationID).Delete(ctx)
+	_, err = gorm.G[models.EventRegistration](h.db).Where("registration_id = ?", req.RegistrationID).Delete(ctx)
 
 	if err != nil {
 		h.sendError(ctx, 404, err.Error())
@@ -713,11 +716,86 @@ func (h *Handler) deleteRegistration(ctx *gin.Context) {
 }
 
 func (h *Handler) createEventRegistration(ctx *gin.Context) {
-	ctx.JSON(200, nil)
+	// Pretty much it's like createVisit but we check if Now <= Until and if we have room for that many people
+	// TODO: Friendssssssssss Tomodachiiiii Freudennnnnn Arkadaşlarrrrr
+	var req models.CreateEventRegistrationRequest
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		h.sendError(ctx, 400, "Malformed request: "+err.Error())
+		return
+	}
+
+	// TODO: Check whether the registration exists???
+	regId := req.RegistrationID
+	reg, err := gorm.G[models.RegistrationWithCount](h.db).Table("registrations_with_count").Where("id = ?", regId).First(ctx)
+	if err != nil {
+		h.sendError(ctx, 404, err.Error())
+		return
+	}
+
+	if reg.Until.After(time.Now()) {
+		h.sendError(ctx, 400, "The registration is closed")
+		return
+	}
+
+	var v models.Visitor
+	v, err = gorm.G[models.Visitor](h.db).Where("hash = ?", req.Hash).First(ctx)
+	if err != nil {
+		h.sendError(ctx, 404, err.Error())
+		return
+	}
+	_, err = gorm.G[models.EventRegistration](h.db).Where("registration_id = ? AND visitor_id = ?", req.RegistrationID, v.ID).First(ctx) // HUH, Okay gotta use this context
+
+	if err == nil {
+		h.sendError(ctx, 403, "The registration already exists")
+		return
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		h.sendError(ctx, 404, err.Error())
+		return
+	}
+
+	// TODO: Handle friends
+	if 1+reg.Registered > reg.MaxRegistrations {
+		h.sendError(ctx, 403, "Can't register because the maximum is reached")
+	}
+
+	err = gorm.G[models.EventRegistration](h.db).Create(ctx, &models.EventRegistration{
+		RegistrationID: req.RegistrationID,
+		VisitorID:      v.ID,
+	})
+	if err != nil {
+		h.sendError(ctx, 404, err.Error())
+		return
+	}
+
+	var er models.EventRegistration
+	er, err = gorm.G[models.EventRegistration](h.db).Where("visitor_id = ? AND registration_id = ?", v.ID, req.RegistrationID).Preload("Registration", nil).First(ctx) // HUH, Okay gotta use this context
+	if err != nil {
+		h.sendError(ctx, 404, err.Error())
+		return
+	}
+
+	ctx.JSON(200, er.ToDTO())
 }
 
 func (h *Handler) deleteEventRegistration(ctx *gin.Context) {
-	ctx.JSON(200, nil)
+	var req models.DeleteEventRegistrationRequest
+
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		h.sendError(ctx, 400, "Malformed request: "+err.Error())
+		return
+	}
+
+	// TODO: Either have more checks or do this shoot in a transaction!
+	evreg, err := gorm.G[models.EventRegistration](h.db).Where("id = ?", req.EventRegistrationID).First(ctx) // HUH, Okay gotta use this context
+	_, err = gorm.G[models.EventRegistration](h.db).Where("id = ?", evreg.ID).Delete(ctx)
+
+	if err != nil {
+		h.sendError(ctx, 404, err.Error())
+		return
+	}
+
+	ctx.JSON(204, nil)
 }
 
 func (h *Handler) getRegistrationsRaw(ctx *gin.Context, hidePrivate bool) {
@@ -733,7 +811,25 @@ func (h *Handler) getAdminRegistrations(ctx *gin.Context) {
 }
 
 func (h *Handler) getEventRegistrations(ctx *gin.Context) {
-	ctx.JSON(200, nil)
+	var req models.GetEventRegistrationsRequest
+
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		h.sendError(ctx, 400, "Malformed request: "+err.Error())
+		return
+	}
+
+	// TODO: Either have more checks or do this shoot in a transaction!
+	evreg, err := gorm.G[models.EventRegistration](h.db).Where("registration_id = ?", req.RegistrationID).Find(ctx)
+	var res []models.EventRegistrationDTO
+	for _, ev := range evreg {
+		res = append(res, ev.ToDTO())
+	}
+	if err != nil {
+		h.sendError(ctx, 404, err.Error())
+		return
+	}
+
+	ctx.JSON(200, res)
 }
 
 func Setup(db *gorm.DB, adminPass, frontendUrl, salt string) *gin.Engine {

@@ -160,6 +160,14 @@ type EventRegistration struct {
 	Friend       *EventRegistration `gorm:"foreignKey:FriendRegistrationID;"`
 }
 
+func (er *EventRegistration) ToDTO() EventRegistrationDTO {
+	return EventRegistrationDTO{
+		RegistrationID:       er.RegistrationID,
+		VisitorID:            er.VisitorID,
+		FriendRegistrationID: er.FriendRegistrationID,
+	}
+}
+
 func createVisitsView(db *gorm.DB) {
 	// LOVE Hardcoding table names lol
 	db.Exec(`CREATE VIEW IF NOT EXISTS visits_with_age AS
