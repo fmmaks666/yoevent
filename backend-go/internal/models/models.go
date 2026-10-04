@@ -149,6 +149,11 @@ type RegistrationWithCount struct {
 	Registered uint
 }
 
+type RegistrationsQueryResult struct {
+	RegistrationWithCount
+	IsRegistered bool
+}
+
 type EventRegistration struct {
 	gorm.Model
 	RegistrationID       uint `gorm:"not null"`
@@ -185,13 +190,18 @@ func createRegistrationsView(db *gorm.DB) {
 	// FOR REFERENCE:
 	// SELECT COUNT(visits.event_id), visits.event_id, events.title
 	// FROM visits LEFT JOIN events ON visits.event_id = events.id GROUP BY visits.event_id ORDER BY COUNT(*) DESC;
-	db.Exec(`CREATE VIEW registrations_with_count AS SELECT r.*, (SELECT COUNT(*) FROM event_registrations er WHERE er.registration_id = r.id) as registered FROM registations r;
-	`)
+	db.Exec(`CREATE VIEW IF NOT EXISTS registrations_with_count AS
+		SELECT r.*, (
+			SELECT COUNT(*) FROM event_registrations er
+			WHERE er.registration_id = r.id AND deleted_at IS NULL) as registered 
+		FROM registrations r`)
 }
 func Setup(db *gorm.DB) {
 	db.AutoMigrate(&Event{})
 	db.AutoMigrate(&Visitor{})
 	db.AutoMigrate(&Visit{})
+	db.AutoMigrate(&Registration{})
+	db.AutoMigrate(&EventRegistration{})
 	createVisitsView(db)
 	createRegistrationsView(db)
 }

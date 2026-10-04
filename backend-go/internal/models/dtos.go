@@ -76,6 +76,8 @@ type RegistrationEssentialDTO struct {
 type RegistrationDTO struct {
 	ID uint `json:"registration_id" binding:"required" form:"registration_id"`
 	RegistrationEssentialDTO
+	Registered   uint `json:"registered"form:"registered"`
+	IsRegistered bool `json:"is_registered" form:"is_registered"`
 }
 
 type EventRegistrationDTO struct {

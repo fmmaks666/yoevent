@@ -638,7 +638,7 @@ func (h *Handler) createRegistration(ctx *gin.Context) {
 		return
 	}
 
-	reg, err := gorm.G[models.Event](h.db).Where("event_id = ?", eventId).First(ctx)
+	reg, err := gorm.G[models.Registration](h.db).Where("event_id = ?", eventId).First(ctx)
 	if err != nil {
 		h.sendError(ctx, 404, err.Error())
 		return
@@ -649,6 +649,7 @@ func (h *Handler) createRegistration(ctx *gin.Context) {
 }
 
 func (h *Handler) updateRegistration(ctx *gin.Context) {
+	// NOTE: Supports only ONE REGISTRATION per event
 	var req models.UpdateRegistrationRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -665,8 +666,8 @@ func (h *Handler) updateRegistration(ctx *gin.Context) {
 
 	eventId := event.ID
 
-	_, err = gorm.G[models.Registration](h.db).Updates(ctx, models.Registration{
-		EventID:          eventId,
+	_, err = gorm.G[models.Registration](h.db).Where("event_id = ?", event.ID).Updates(ctx, models.Registration{
+		EventID:          event.ID,
 		Title:            req.Title,
 		Description:      req.Description,
 		Until:            req.Until,
@@ -679,7 +680,7 @@ func (h *Handler) updateRegistration(ctx *gin.Context) {
 		return
 	}
 
-	reg, err := gorm.G[models.Event](h.db).Where("event_id = ?", eventId).First(ctx)
+	reg, err := gorm.G[models.Registration](h.db).Where("event_id = ?", eventId).First(ctx)
 	if err != nil {
 		h.sendError(ctx, 404, err.Error())
 		return
@@ -733,7 +734,7 @@ func (h *Handler) createEventRegistration(ctx *gin.Context) {
 		return
 	}
 
-	if reg.Until.After(time.Now()) {
+	if reg.Until.Before(time.Now()) {
 		h.sendError(ctx, 400, "The registration is closed")
 		return
 	}
@@ -757,6 +758,7 @@ func (h *Handler) createEventRegistration(ctx *gin.Context) {
 	// TODO: Handle friends
 	if 1+reg.Registered > reg.MaxRegistrations {
 		h.sendError(ctx, 403, "Can't register because the maximum is reached")
+		return
 	}
 
 	err = gorm.G[models.EventRegistration](h.db).Create(ctx, &models.EventRegistration{
@@ -779,6 +781,7 @@ func (h *Handler) createEventRegistration(ctx *gin.Context) {
 }
 
 func (h *Handler) deleteEventRegistration(ctx *gin.Context) {
+	// NOTE: For now it will DELETE based on EVENT ID and VISITOR
 	var req models.DeleteEventRegistrationRequest
 
 	if err := ctx.ShouldBindQuery(&req); err != nil {
@@ -786,10 +789,15 @@ func (h *Handler) deleteEventRegistration(ctx *gin.Context) {
 		return
 	}
 
+	event, err := gorm.G[models.Event](h.db).Where("public_id = ?", req.EventID).First(ctx)
+	v, err := gorm.G[models.Visitor](h.db).Where("hash = ?", req.Hash).First(ctx)
+	// TODO: Check for errors here
 	// TODO: Either have more checks or do this shoot in a transaction!
-	evreg, err := gorm.G[models.EventRegistration](h.db).Where("id = ?", req.EventRegistrationID).First(ctx) // HUH, Okay gotta use this context
-	_, err = gorm.G[models.EventRegistration](h.db).Where("id = ?", evreg.ID).Delete(ctx)
+	//evreg, err := gorm.G[models.EventRegistration](h.db).Where("id = ?", req.EventRegistrationID).First(ctx) // HUH, Okay gotta use this context
+	//_, err = gorm.G[models.EventRegistration](h.db).Where("id = ?", evreg.ID).Delete(ctx)
 
+	reg, err := gorm.G[models.Registration](h.db).Where("event_id = ?", event.ID).First(ctx)
+	_, err = gorm.G[models.EventRegistration](h.db).Where("registration_id = ? AND visitor_id = ?", reg.ID, v.ID).Delete(ctx)
 	if err != nil {
 		h.sendError(ctx, 404, err.Error())
 		return
@@ -799,7 +807,63 @@ func (h *Handler) deleteEventRegistration(ctx *gin.Context) {
 }
 
 func (h *Handler) getRegistrationsRaw(ctx *gin.Context, hidePrivate bool) {
-	ctx.JSON(200, nil)
+	var err error
+	/* pageStr := ctx.Query("page")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1
+	} */
+	visitor := ctx.Query("visitor") // DATED
+
+	//offset := (page - 1) * models.PerPage
+	// WHO THE FUCK WROTE THIS? OH IT WAS ME
+	var events []models.RegistrationsQueryResult
+	if visitor == "" {
+		// I'll give you a chuu, GORM
+		// MY LOVELY HACKS
+		base := gorm.G[models.Registration](h.db).Table("registrations_with_count").Select("registrations_with_count.*, 0 as is_registered").Where("1 = 1") /* Offset(offset).Limit(models.PerPage).*/
+		if hidePrivate {
+			base = base.Where("is_private = ?", false)
+		}
+		err = base.Order("until DESC").Scan(ctx, &events)
+	} else {
+		/*
+			SELECT events.*,
+				EXISTS (
+					SELECT 1 FROM visits
+					LEFT JOIN visitors ON visits.visitor_id = visitors.id
+					WHERE visits.event_id = events.id AND visitors.hash = '93a60abce2f727ea878a5ab265da31a9285ae7b1'
+				)
+			as visited
+			FROM events;
+		*/
+		base := gorm.G[models.Registration](h.db).Table("registrations_with_count").Select(
+			"registrations_with_count.*, "+
+				"EXISTS (SELECT 1 FROM event_registrations er "+
+				"LEFT JOIN visitors ON er.visitor_id = visitors.id "+
+				"WHERE er.registration_id = registrations.id AND visitors.hash = ?)"+
+				"as is_registered", visitor).Where("1 = 1") // HACKS, take my CHUU!
+		if hidePrivate {
+			base = base.Where("is_private = ?", false)
+		}
+
+		err = base.Scan(ctx, &events)
+	}
+
+	if err != nil {
+		h.sendError(ctx, 400, err.Error())
+		return
+	}
+	var dtos []models.RegistrationDTO
+	var dto models.RegistrationDTO
+	for _, r := range events {
+		dto = r.ToDTO()
+		dto.IsRegistered = r.IsRegistered
+		dto.Registered = r.Registered
+		dtos = append(dtos, dto)
+	}
+
+	ctx.JSON(200, dtos)
 }
 
 func (h *Handler) getRegistrations(ctx *gin.Context) {
@@ -819,10 +883,13 @@ func (h *Handler) getEventRegistrations(ctx *gin.Context) {
 	}
 
 	// TODO: Either have more checks or do this shoot in a transaction!
-	evreg, err := gorm.G[models.EventRegistration](h.db).Where("registration_id = ?", req.RegistrationID).Find(ctx)
-	var res []models.EventRegistrationDTO
+	evreg, err := gorm.G[models.EventRegistration](h.db).Where("registration_id = ?", req.RegistrationID).Preload("Visitor", nil).Find(ctx)
+	var res []models.GetEventRegistrationSingleResponse
 	for _, ev := range evreg {
-		res = append(res, ev.ToDTO())
+		res = append(res, models.GetEventRegistrationSingleResponse{
+			EventRegistrationDTO: ev.ToDTO(),
+			Visitor:              ev.Visitor.ToDTO(),
+		})
 	}
 	if err != nil {
 		h.sendError(ctx, 404, err.Error())
@@ -852,7 +919,7 @@ func Setup(db *gorm.DB, adminPass, frontendUrl, salt string) *gin.Engine {
 	router.POST("/visit", handler.createVisit)
 	router.POST("/registration", handler.createEventRegistration)
 	router.DELETE("/registration", handler.deleteEventRegistration)
-	router.GET("/registrations", nil)
+	router.GET("/registrations", handler.getRegistrations)
 
 	admin := router.Group("/admin")
 	admin.Use(gin.BasicAuth(gin.Accounts{
@@ -869,7 +936,8 @@ func Setup(db *gorm.DB, adminPass, frontendUrl, salt string) *gin.Engine {
 	admin.POST("/registration", handler.createRegistration)
 	admin.PUT("/registration", handler.updateRegistration)
 	admin.DELETE("/registration", handler.deleteRegistration)
-	admin.GET("/registrations", nil)
+	admin.GET("/registrations", handler.getAdminRegistrations)
+	admin.GET("/event-registrations", handler.getEventRegistrations)
 
 	return router
 }
