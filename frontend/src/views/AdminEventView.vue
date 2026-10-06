@@ -242,7 +242,7 @@ async function deleteEvent() {
     <DeleteButton @delete="deleteEvent" label="Видалити подію" class="delete-button" />
     <Spinner v-if="isPendingDelete" />
     <ErrorBox v-if="isErrorDelete" :message="errorDelete?.message" />
-    <div v-if="eventData.is_onetime" class="tools">
+    <div v-if="eventData && eventData.is_onetime" class="tools">
       <button @click="creatingReg = true" data-variant="secondary">Створити реєстрацію</button>
     </div>
     <RegistrationForm v-if="creatingReg" @submit="console.log" />
