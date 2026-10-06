@@ -6,6 +6,10 @@ async function getEvents(visitor = undefined) {
   return fetch(`${API}/events?visitor=${visitor}`)
 }
 
+async function getRegistrations(visitor = undefined) {
+  return fetch(`${API}/registrations?visitor=${visitor}`)
+}
+
 async function getEvent(eventId = undefined) {
   return fetch(`${API}/event?event=${eventId}`)
 }
@@ -14,13 +18,37 @@ async function getVisits(visitor = undefined) {
   return fetch(`${API}/visits?visitor=${visitor}`)
 }
 
-async function postVisit(event_id, visitor) {
+async function postVisit(eventId, visitor) {
   return fetch(`${API}/visit`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ event_id: event_id, visitor: visitor }),
+    body: JSON.stringify({ event_id: eventId, visitor: visitor }),
+  })
+}
+
+async function postEventRegistration(registrationId, visitor) {
+  return fetch(`${API}/registration`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ registration_id: registrationId, visitor: visitor }),
+  })
+}
+
+async function deleteEventRegistration(registrationId, visitor) {
+  const params = new URLSearchParams({
+    registration_id: registrationId,
+    visitor: visitor,
+  })
+
+  return fetch(`${API}/registration?${params.toString()}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   })
 }
 
@@ -70,6 +98,14 @@ async function checkAuth(token) {
 
 async function getEventsAdmin(token) {
   return fetch(`${API}/admin/events`, {
+    headers: {
+      Authorization: `Basic ${token}`,
+    },
+  })
+}
+
+async function getRegistrationsAdmin(token) {
+  return fetch(`${API}/admin/registrations`, {
     headers: {
       Authorization: `Basic ${token}`,
     },
@@ -161,4 +197,8 @@ export {
   downloadVisits,
   getEventStats,
   doDeleteEvent,
+  getRegistrations,
+  postEventRegistration,
+  deleteEventRegistration,
+  getRegistrationsAdmin,
 }

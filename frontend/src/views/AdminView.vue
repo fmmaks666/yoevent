@@ -52,6 +52,7 @@ watch(isError, (failed) => {
 <template>
   <nav>
     <RouterLink to="/admin/dashboard">Панель адміністратора</RouterLink>
+    <RouterLink to="/admin/registrations">Реєстрації</RouterLink>
     <RouterLink to="/admin/visitors">Відвідувачі</RouterLink>
   </nav>
 

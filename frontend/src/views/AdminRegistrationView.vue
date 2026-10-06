@@ -15,7 +15,6 @@ import { useAppStore } from '../stores/app.js'
 import AdminView from './AdminView.vue'
 import AdminForm from '../components/AdminForm.vue'
 import EventForm from '../components/EventForm.vue'
-import RegistrationForm from '../components/RegistrationForm.vue'
 import EventOverview from '../components/EventOverview.vue'
 import Event from '../components/Event.vue'
 import ErrorBox from '../components/ErrorBox.vue'
@@ -33,7 +32,6 @@ const route = useRoute()
 const client = useQueryClient()
 
 const isEditing = ref(false)
-const creatingReg = ref(false)
 const date = new Date()
 const selectedDate = ref({ year: date.getFullYear(), month: date.getMonth() + 1 })
 
@@ -240,12 +238,6 @@ async function deleteEvent() {
     <AddVisitorForm @submit="addVisitor" class="add-visitor" />
     <Spinner v-if="isPendingVisit" />
     <DeleteButton @delete="deleteEvent" label="Видалити подію" class="delete-button" />
-    <Spinner v-if="isPendingDelete" />
-    <ErrorBox v-if="isErrorDelete" :message="errorDelete?.message" />
-    <div v-if="eventData.is_onetime" class="tools">
-      <button @click="creatingReg = true" data-variant="secondary">Створити реєстрацію</button>
-    </div>
-    <RegistrationForm v-if="creatingReg" @submit="console.log" />
     <Spinner v-if="isPendingDelete" />
     <ErrorBox v-if="isErrorDelete" :message="errorDelete?.message" />
   </AdminView>

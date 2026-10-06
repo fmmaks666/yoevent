@@ -26,6 +26,7 @@ type CreateVisitorResponse struct {
 
 type CreateEventRegistrationResponse struct {
 	EventRegistrationDTO
+	Registration RegistrationDTO `json:"registration"`
 }
 
 type GetEventRegistrationSingleResponse struct {

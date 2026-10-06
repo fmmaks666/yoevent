@@ -11,6 +11,11 @@ const router = createRouter({
       component: EventsView,
     },
     {
+      path: '/registrations',
+      name: 'registrations',
+      component: () => import('../views/RegistrationsView.vue'),
+    },
+    {
       path: '/data',
       name: 'data',
       component: DataView,
@@ -24,6 +29,16 @@ const router = createRouter({
       path: '/admin/dashboard',
       name: 'admin',
       component: () => import('../views/AdminMainView.vue'),
+    },
+    {
+      path: '/admin/registrations',
+      name: 'admin-registrations',
+      component: () => import('../views/AdminRegistrationsView.vue'),
+    },
+    {
+      path: '/admin/registration/:id',
+      name: 'admin-registration',
+      component: () => import('../views/AdminRegistrationView.vue'),
     },
     {
       path: '/admin/visitors',
@@ -54,6 +69,11 @@ const router = createRouter({
       path: '/v/:id',
       name: 'visit',
       component: () => import('../views/VisitView.vue'),
+    },
+    {
+      path: '/r/:id',
+      name: 'reg',
+      component: () => import('../views/RegistrationView.vue'),
     },
   ],
 })

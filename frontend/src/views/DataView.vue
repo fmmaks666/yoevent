@@ -53,6 +53,8 @@ async function onSubmit(d) {
 
     if (route.query.event) {
       router.push(`/v/${route.query.event}`)
+    } else if (route.query.registration) {
+      router.push(`/r/${route.query.registration}`)
     }
   } catch (e) {
     console.error(e)

@@ -38,8 +38,9 @@ type CreateEventRegistrationRequest struct {
 
 type DeleteEventRegistrationRequest struct {
 	//EventRegistrationID uint   `json:"event_registration_id" binding:"required" form:"event_registration_id"`
-	EventID string `json:"event_id" binding:"required" form:"event_id"`
-	Hash    string `json:"visitor" binding:"required" form:"visitor"`
+	RegistrationID uint `json:"registration_id" binding:"required" form:"registration_id"`
+	//EventID uint   `json:"event_id" binding:"required" form:"event_id"` // TODO: Make this string ID!
+	Hash string `json:"visitor" binding:"required" form:"visitor"`
 }
 
 type GetEventRegistrationsRequest struct {

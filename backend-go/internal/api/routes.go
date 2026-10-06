@@ -777,7 +777,14 @@ func (h *Handler) createEventRegistration(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(200, er.ToDTO())
+	var res models.CreateEventRegistrationResponse
+
+	res = models.CreateEventRegistrationResponse{
+		EventRegistrationDTO: er.ToDTO(),
+		Registration:         reg.ToDTO(),
+	}
+
+	ctx.JSON(200, res)
 }
 
 func (h *Handler) deleteEventRegistration(ctx *gin.Context) {
@@ -789,15 +796,16 @@ func (h *Handler) deleteEventRegistration(ctx *gin.Context) {
 		return
 	}
 
-	event, err := gorm.G[models.Event](h.db).Where("public_id = ?", req.EventID).First(ctx)
+	// TODO: This is a lil bit big change so this will work with THE RAW ID of the event
+	//event, err := gorm.G[models.Event](h.db).Where("public_id = ?", req.EventID).First(ctx)
 	v, err := gorm.G[models.Visitor](h.db).Where("hash = ?", req.Hash).First(ctx)
 	// TODO: Check for errors here
 	// TODO: Either have more checks or do this shoot in a transaction!
 	//evreg, err := gorm.G[models.EventRegistration](h.db).Where("id = ?", req.EventRegistrationID).First(ctx) // HUH, Okay gotta use this context
 	//_, err = gorm.G[models.EventRegistration](h.db).Where("id = ?", evreg.ID).Delete(ctx)
 
-	reg, err := gorm.G[models.Registration](h.db).Where("event_id = ?", event.ID).First(ctx)
-	_, err = gorm.G[models.EventRegistration](h.db).Where("registration_id = ? AND visitor_id = ?", reg.ID, v.ID).Delete(ctx)
+	// reg, err := gorm.G[models.Registration](h.db).Where("event_id = ?", req.EventID).First(ctx)
+	_, err = gorm.G[models.EventRegistration](h.db).Where("registration_id = ? AND visitor_id = ?", req.RegistrationID, v.ID).Delete(ctx)
 	if err != nil {
 		h.sendError(ctx, 404, err.Error())
 		return
@@ -841,7 +849,7 @@ func (h *Handler) getRegistrationsRaw(ctx *gin.Context, hidePrivate bool) {
 			"registrations_with_count.*, "+
 				"EXISTS (SELECT 1 FROM event_registrations er "+
 				"LEFT JOIN visitors ON er.visitor_id = visitors.id "+
-				"WHERE er.registration_id = registrations.id AND visitors.hash = ?)"+
+				"WHERE er.registration_id = registrations_with_count.id AND visitors.hash = ? AND er.deleted_at IS NULL)"+
 				"as is_registered", visitor).Where("1 = 1") // HACKS, take my CHUU!
 		if hidePrivate {
 			base = base.Where("is_private = ?", false)

@@ -14,6 +14,7 @@ const contact = import.meta.env.VITE_CONTACT_INFO
       <nav>
         <RouterLink to="/"><YMCALogo /></RouterLink>
         <RouterLink to="/">Події</RouterLink>
+        <RouterLink to="/registrations">Реєстрації</RouterLink>
         <RouterLink to="/data">Мої дані</RouterLink>
         <RouterLink to="/visits">Відвідане</RouterLink>
       </nav>
@@ -44,6 +45,8 @@ nav {
   text-align: center;
   margin: 0 4px;
   margin-top: 32px;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 nav a.router-link-exact-active {
@@ -106,6 +109,7 @@ footer {
   } */
 
   nav {
+    width: 100%;
     margin-top: 1rem;
     padding: 1rem 0;
     font-size: 1.3rem;

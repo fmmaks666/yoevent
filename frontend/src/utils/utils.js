@@ -59,6 +59,16 @@ function formatDate(eventData) {
   }
 }
 
+function formatDateRegistration(r) {
+  const fmt = new Intl.DateTimeFormat('uk-UA', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'Europe/Kyiv',
+  })
+
+  return `До ${fmt.format(new Date(r.until))}`
+}
+
 // TODO: Fix this ass
 function formatVisitDate(visit) {
   const fmt = new Intl.DateTimeFormat('uk-UA', {
@@ -180,6 +190,7 @@ function toUTC(date) {
 
 export {
   formatDate,
+  formatDateRegistration,
   formatVisitDate,
   formatBirthdate,
   normalizeBirthdate,
